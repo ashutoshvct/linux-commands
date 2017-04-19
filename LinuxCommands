@@ -1,0 +1,3456 @@
+//AWS CLI Commands VIP
+------------------------------------------------------------------------------------------------------------------------------------------------
+//For checking internet speed on linux
+wget -O speedtest-cli https://raw.github.com/sivel/speedtest-cli/master/speedtest_cli.py
+chmod +x speedtest-cli
+./speedtest-cli
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Automation Script:
+MySQL 5.6, PHP 5.6, Apache 2.4, vsftp 3.
+//For amazon-linux
+//For log nano to /var/log/cloud-init-output.log
+//Please wait 15-20 mins for installation to take place.
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+#!/bin/bash
+yum update -y
+yum install -y httpd24 php56 mysql56-server php56-mysqlnd
+service httpd start
+chkconfig httpd on
+groupadd www
+usermod -a -G www ec2-user
+chown -R root:www /var/www
+chmod 2775 /var/www
+find /var/www -type d -exec chmod 2775 {} +
+find /var/www -type f -exec chmod 0664 {} +
+echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
+service mysqld start
+chkconfig mysqld on
+yum install vsftpd -y
+service vsftpd start
+chkconfig vsftpd on
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//For Ubuntu 14.04
+
+#!/bin/bash
+debconf-set-selections <<< 'mysql-server mysql-server/root_password password root'
+debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password root'
+apt-get update -y
+apt-get install mysql-server-5.6 -y
+apt-get install apache2 -y
+add-apt-repository ppa:ondrej/php -y
+apt-get update -y
+apt-get install php5.6 php5.6-mcrypt php5.6-mbstring php5.6-curl php5.6-cli php5.6-mysql php5.6-gd php5.6-intl php5.6-xsl -y --force-yes
+apt-get install libapache2-mod-auth-mysql
+apt-get install vsftpd -y
+service apache2 restart
+--------------------------------------------------
+
+//For Redhat 7.2
+//for mysql use command sudo "mysql -u root" in terminal as mysql has no password.
+
+#!/bin/bash
+yum update -y
+yum install httpd -y
+service httpd start
+rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+yum install php56w php56w-opcache -y
+yum install http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm -y
+yum install mysql-community-server -y
+systemctl start mysqld
+systemctl enable mysqld.service
+yum install vsftpd ftp -y
+service httpd restart
+systemctl enable httpd.service
+----------------------------------------------------
+
+//For redirecting to cloudfront
+
+Options +FollowSymlinks
+RewriteEngine on
+rewriterule ^wp-content/uploads/(.*)$ http://d373vo9okeg161.cloudfront.net/$1 [$
+
+# BEGIN WordPress
+
+# END WordPress
+--------------------------------------------------------------------------
+* * * * * /usr/bin/php /var/www/html/bin/magento 
+:run | grep -v "Ran jobs by schedule" >> /var/www/html/var/log/magento.cron.log
+* * * * * /usr/bin/php /var/www/html/update/cron.php >> /var/www/html/var/log/update.cron.log
+* * * * * /usr/bin/php /var/www/html/bin/magento setup:cron:run >> /var/www/html/var/log/setup.cron.log
+
+-------------------------------------------------------------------------------------------------------------
+//Ruby on rails
+#rails s -b 0.0.0.0
+##!/bin/bash
+apt-get update -y
+cd
+cd myapp/
+rails s -b 0.0.0.0
+--------------------------------------------------------------------------------------------------------
+https://calculator.s3.amazonaws.com/index.html#r=IAD&key=calc-FA1A0C93-E87F-4B7C-9E75-DBB1FD9F23C2
+----------------------------------------------------------------------------------------------------------
+allow_writeable_chroot=YES
+----------------------------------------------------------------------------------------------------
+//Print list of folder column wise
+ls -l | awk '{print $9}'
+---------------------------------------------------------------
+//start rail server use -d to run it in background
+bundle exec rails server --binding=0.0.0.0
+-----------------------------------------------------------------
+//Generating random password
+date +%s | sha256sum | base64 | head -c 12 ; echo
+
+//Generating random password and saving it in mysql
+date +%s | sha256sum | base64 | head -c 12 >> a.txt
+sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password << a.txt'
+------------------------------------------------------------------------------------------------
+//Getting instance ip
+
+command="curl http://169.254.169.254/latest/meta-data/public-ipv4"
+eval $command
+ip=`eval $command`
+echo $ip
+
+or
+
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+echo $ip
+----------------------------------------------------------------------------------------------------
+//Changing terminal name
+
+PROMPT_COMMAND='echo -en "\033]0;Drupal-test-sh\a"'
+----------------------------------------------------------------------------------------------------
+//Text find and replace
+
+perl -pi -e 's/54.90.208.24/54.90.208.241/g' gitlab.rb
+------------------------------------------------------------------------------------------------------
+//Chaning ip using find and replace in ubuntu - gitlab using shell
+
+#!/bin/bash
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+cd /etc/gitlab/
+sed -i -e 's/12345/'$ip'/g' gitlab.rb
+-------------------------------------------------------------------------------------------------------
+// changing gitlab admin password using ruby, rails and shell script.
+
+.sh script
+#!/bin/bash
+cd /opt/gitlab/embedded/service/gitlab-rails 
+gitlab-rails runner "eval(File.read 'pass.rb')"
+
+.rb script
+#!/usr/bin/ruby
+
+user = User.where(id: 1).first
+user.password = "#{pass}"
+user.password_confirmation = "#{pass}"
+user.save!
+-----------------------------------------------------------------------------------------------------------
+// accessing docker files and editing it using vi :login
+
+docker exec -i -t 27d6158fdbc7 /bin/bash
+then use vi to edit.
+--------------------------------------------------------------------------------------------------------
+// script to take ip from ruby file and replacing it with current ip in shell
+
+#!/bin/bash
+## to change the ip of gitlab and mattermost according to the current public ip$
+cd /etc/gitlab
+awk 'NR==11' gitlab.rb >> a.txt
+cip1="$(awk '{print $2}' a.txt >> b.txt)"
+sed -e 's|["'\'']||g' b.txt >> c.txt
+cip2="$(cat c.txt)"
+sed 's|http://||' c.txt >> d.txt 
+cip="$(cat d.txt)"
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+sed -i "s|$cip|$ip|g" gitlab.rb
+rm a.txt b.txt c.txt d.txt
+gitlab-ctl reconfigure
+------------------------------------------------------------------------------------------------------------
+// Script to change ip inside docker for nginx using alpine os 
+
+#!/bin/bash
+cd /etc/nginx
+awk 'NR==23' nginx.conf >> a.txt
+cip1="$(awk '{print $2}' a.txt >> b.txt)"
+#sed -e 's|["'\'']||g' b.txt >> c.txt
+#cip2="$(cat c.txt)"
+sed 's|:8000;||' b.txt >> c.txt
+cip="$(cat c.txt)"
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+sed -i "s|$cip|$ip|g" nginx.conf
+rm a.txt b.txt c.txt
+----------------------------------------------------------------------------------------------------------
+// How to use multiple reboot command for crontab
+
+sudo crontab -e
+@reboot /path/to/script1.sh && /path/to/script2.sh
+
+or
+
+all.sh script
+#!/bin/bash
+/path/to/script1.sh
+/path/to/script2.sh
+
+sudo crontab -e
+@reboot /path/to/all.sh
+-----------------------------------------------------------------------------------------------------------
+// How to see cron logs in ubuntu
+
+grep CRON /var/log/syslog  or  tail -f /var/log/syslog | grep CRON
+
+or
+
+1. Open the file
+
+/etc/rsyslog.d/50-default.conf
+
+2. Find the line that starts with:
+
+#cron.*
+
+3. uncomment that line, save the file, and restart rsyslog:
+
+sudo service rsyslog restart
+
+4. You should now see a cron log file here:
+
+/var/log/cron.log
+--------------------------------------------------------------------------------------------------------------
+// How to check ram slots in Ubuntu 16.04LTS
+
+sudo dmidecode -t 17
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to Remove Docker Completely
+
+1. The uninstallation step mentions:
+
+sudo apt-get purge -y docker-engine
+sudo apt-get autoremove -y --purge docker-engine
+sudo apt-get autoclean
+
+2. The above commands will not remove images, containers, volumes, or user created configuration files on your host. If you wish to delete all images, containers, and volumes run the following command:
+
+sudo rm -rf /var/lib/docker
+
+3. Remove docker from apparmor.d:
+
+sudo rm /etc/apparmor.d/docker
+
+4. Remove docker group:
+
+sudo groupdel docker
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to create and implement SSL (SelfSigned) on IP on Ubuntu apache 
+
+1. sudo a2enmod ssl headers
+
+2. sudo service apache2 restart
+
+3. sudo mkdir /etc/apache2/ssl
+
+4. sudo openssl req -x509 -nodes -days 99999 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
+
+5. sudo nano /etc/apache2/sites-available/default-ssl.conf
+
+Find the section:
+
+VirtualHost _default_:443
+
+Then, find:
+
+ServerAdmin webmaster@localhost
+
+And add the following Virtual Host configuration on the next line:
+
+ServerName kb.fakedomainname.com:443
+
+6. Verify that the following variables are set appropriately in the same file:
+
+SSLEngine on
+SSLCertificateFile /etc/apache2/ssl/apache.crt
+SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+
+7. Activate the virtual host with the command:
+
+a2ensite default-ssl
+
+Then restart Apache once more:
+
+service apache2 restart
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to redirect http to https on IP address in ubuntu (apache2)
+
+1. sudo nano /etc/apache2/sites-available/000-default.conf
+<VirtualHost 192.168.0.100:80>
+    ServerName  example.com/
+    Redirect / https://example.com/
+</VirtualHost>
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Scripts for Kanboard/ Yii2.0 AMI
+
+Here, I have scripted for php interactive shell and accessed DB and automated the user password. 
+
+1. pass.sh (Main Script)
+
+#!/bin/bash
+bash phprun.sh;
+sleep 5s;
+p="$(cat pass.txt)"
+mysql -u "kanboard" -p"root" -D "kanboard" -e "UPDATE users SET password='$p' WHERE username='admin';"
+
+2. phpcode.php (to run php script for password)
+
+<?php
+$id=exec("curl http://169.254.169.254/latest/meta-data/instance-id");
+$pass=password_hash($id, PASSWORD_DEFAULT);
+file_put_contents('/var/www/html/pass.txt', $pass);
+?>
+
+3. phprun.sh (to run php script)
+
+#!/bin/bash/php
+php phpcode.php
+
+4. kanboard.sh (script for crontab)
+
+#!/bin/bash
+bash pass.sh
+sleep 1m;
+rm -rf pass.sh phpcode.php phprun.sh pass.txt kanboard.sh
+
+5. /etc/rc.local
+
+Advantages:
+
+Used Mysql database for large set of users.
+OPcache is enabled for better performance.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Yii2.0 advanced
+
+1. Install LAMP-Server
+2. Download Tarball of yii2.0 and extract it in /var/www/html/
+3. Open requirements.php in browser and install all php extensions.
+4. sudo php init
+5. Create DB for yii.
+6. sudo nano common/config/main-local.php (Fill the DB details)
+7. sudo ./yii migrate (db tables in your db)
+8. go in browser and view 2 urls: localhost/advanced/frontend/web and localhost/advanced/backend/web
+9. install phpmyadmin.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Create DB user, db and give him permission
+
+create database osticketdb
+CREATE USER 'osticketuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL ON osticketdb.* TO 'osticketuser'@'localhost';
+flush privileges;
+exit;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//apache2 index.php preference
+
+sudo nano /etc/apache2/mods-enabled/dir.conf
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//apache2 php is not connecting or displaying #php not displaying
+
+sudo apt install php libapache2-mod-php
+sudo apt install php7.0-mbstring
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//EC2 metadata URL
+
+curl http://169.254.169.254/latest/meta-data/
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//SCP Transfer
+
+scp -i ~/Desktop/test.pem ~/Desktop/cv.html ec2-user@ec2-52-66-105-102.ap-south-1.compute.amazonaws.com:/var/www/html
+
+scp -i ~/Desktop/bitcanopy.pem ~/Downloads/newsletter ubuntu@ec2-54-152-88-254.compute-1.amazonaws.com:/var/www/html/
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Wordpress-Installation (not verified)
+sudo yum update -y
+sudo yum -y install httpd mysql-server php php-mysql
+sudo service httpd start
+sudo service mysqld start
+cd /var/www/html
+sudo wget https://wordpress.org/latest.tar.gz
+sudo tar -xzf /var/www/html/latest.tar.gz
+cd wordpress/
+sudo mv * ../
+cd ..
+sudo mysql -e "create database wordpress; create user 'wp-user'@'localhost' identified by 'wp-password'; grant all privileges on wordpress . * to 'wp-user'@'localhost'; flush privileges;"
+sudo mysqladmin -u root password 'root'
+sudo mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+//sudo chown -R ec2-user:root *
+//sudo service httpd restart
+cd ..
+sudo chmod 777 -R html/.*
+sed -i -e s/"define('DB_NAME', 'database_name_here');"/"define('DB_NAME', 'wordpress');"/ /var/www/html/wp-config.php && sed -i -e s/"define('DB_USER', 'username_here');"/"define('DB_USER', 'wp-user');"/ /var/www/html/wp-config.php && sed -i -e s/"define('DB_PASSWORD', 'password_here');"/"define('DB_PASSWORD', 'wp-password');"/ /var/www/html/wp-config.php
+chmod 644 -R html/.*
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Instance type name
+dirtmcg
+D- density
+i- iops
+r- ram
+t- burstable
+m- main choice for gp apps
+c- compute
+g- graphics
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//magento installation
+#https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-magento-on-ubuntu-14-04
+//magento server ip changed
+#http://magento.stackexchange.com/questions/39752/how-do-i-fix-my-base-urls-so-i-can-access-my-magento-site
+//LDAP server on ubuntu 
+#https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-openldap-and-phpldapadmin-on-an-ubuntu-14-04-server
+//SimpleSAML
+#https://www.helloitsliam.com/2014/12/23/install-configure-and-test-simplesamlphp-for-authentication-testing/
+//ssl on EC2
+#http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-an-instance.html
+//efs backup to s3 using attic
+#https://attic-backup.org/
+#http://serverfault.com/questions/796268/backup-aws-efs-to-s3/796332
+//automated backup ec2 
+#http://www.n2ws.com/how-to-guides/automate-amazon-ec2-instance-backup.html
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Command line instructions
+///Git global setup
+
+git config --global user.name "Administrator"
+git config --global user.email "admin@example.com"
+
+///Create a new repository
+
+git clone git@ec2-54-224-211-184.compute-1.amazonaws.com:root/android-project.git
+cd android-project
+touch README.md
+git add README.md
+git commit -m "add README"
+git push -u origin master
+
+///Existing folder or Git repository
+
+cd existing_folder
+git init
+git remote add origin git@ec2-54-224-211-184.compute-1.amazonaws.com:root/android-project.git
+git add .
+git commit
+git push -u origin master
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Setup ffmpeg on CentOS 7
+
+URL: https://www.webfoobar.com/node/17
+
+Centos 7 64-bit.
+1. ffmpeg requires libdc1394-devel and it is available in epel repository. Execute the following command to install epel repository:
+rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+      
+Note: As of this writing the "http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm" is the latest. If this URL returns 404 error it means that new version is released, you may want to browse "http://dl.fedoraproject.org/pub/epel/7/x86_64/e/" to look for that new released version.
+
+2. ffmpeg is available in ATRPMS Repo. The ATRPMS Repo (http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm) is down, we'll use mirror:
+rpm -ivh https://www.mirrorservice.org/sites/dl.atrpms.net/el7-x86_64/atrpms/stable/atrpms-repo-7-7.el7.x86_64.rpm
+
+3. Modify the atrpms.repo to update its baseurl:
+nano /etc/yum.repos.d/atrpms.repo
+
+Under [atrpms] change the baseurl and enabled 
+
+from:
+baseurl=http://dl.atrpms.net/el$releasever-$basearch/atrpms/stable
+enabled=1
+... to:
+      baseurl=https://www.mirrorservice.org/sites/dl.atrpms.net/el$releasever-$basearch/atrpms/stable
+enabled=0
+      
+4. Lets install now the ffmpeg by executing:
+      yum -y --enablerepo=atrpms install ffmpeg
+      
+5. To verify if ffmpeg is already installed:
+      ffmpeg -version
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Errors
+
+1. 500 OOPS: cannot change directory: /home/user/public_html, VSFTPD error
+
+Solution: 
+That error is generated because of Selinux. Please do the following actions:
+
+[root@sun02 vsftpd]# getenforce
+Enforcing
+[root@sun02 vsftpd]# getsebool -a | grep ftp
+allow_ftpd_anon_write –> off
+allow_ftpd_full_access –> off
+allow_ftpd_use_cifs –> off
+allow_ftpd_use_nfs –> off
+allow_tftp_anon_write –> off
+ftp_home_dir –> on (change that to on in ur case this option is off)
+ftpd_disable_trans –> off
+ftpd_is_daemon –> on
+httpd_enable_ftp_server –> off
+tftpd_disable_trans –> off
+[root@sun02 vsftpd]# setsebool -P ftp_home_dir on
+
+---------------------------------------------------------------------------------
+extension=/usr/lib64/php/modules/pdo.so
+extension=/usr/lib64/php/modules/pdo_mysql.so
+extension=/usr/lib64/php/modules/pdo_sqlite.so
+
+
+/opt/rh/php54/root/usr/lib64/php/modules/mysql.so
+
+
+-----------------------------------------------------------------------------------
+
+					OR
+
+-----------------------------------------------------------------------------------
+Use the permission code to change the folder permission and owner.
+
+to add username: useradd username
+to set userpassword: passwd username
+
+To set file permissions
+
+Add the www group to your instance.
+ 
+[ec2-user ~]$ sudo groupadd www
+Add your user (in this case, ec2-user) to the www group.
+
+[ec2-user ~]$ sudo usermod -a -G www ec2-user
+Important
+You need to log out and log back in to pick up the new group. You can use the exit command, or close the terminal window.
+Log out and then log back in again, and verify your membership in the www group.
+
+Log out.
+
+[ec2-user ~]$ exit
+Reconnect to your instance, and then run the following command to verify your membership in the www group.
+
+[ec2-user ~]$ groups
+ec2-user wheel www
+Change the group ownership of /var/www and its contents to the www group.
+
+[ec2-user ~]$ sudo chown -R root:www /var/www
+Change the directory permissions of /var/www and its subdirectories to add group write permissions and to set the group ID on future subdirectories.
+
+[ec2-user ~]$ sudo chmod 2775 /var/www
+[ec2-user ~]$ find /var/www -type d -exec sudo chmod 2775 {} \;
+Recursively change the file permissions of /var/www and its subdirectories to add group write permissions.
+
+[ec2-user ~]$ find /var/www -type f -exec sudo chmod 0664 {} \; 
+Now ec2-user (and any future members of the www group) can add, delete, and edit files in the Apache document root. Now you are ready to add content, such as a static website or a PHP application.
+
+
+
+usermod --home /var/www/ username
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//EC2 SSL error for CLI
+
+aws ec2 describe-instances --no-verify-ssl --profile region1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+//DB commands
+
+Transfer files within server #import database
+mysql -u username -p database_name < file.sql
+
+To change password of current user
+SET PASSWORD FOR 'username'@'localhost' = PASSWORD('mypass');
+
+To create user and assign to specific DB
+create database databasename;
+CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON databasename.* TO 'username'@'localhost' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+//AMI error
+
+1. Authorized keys found
+Authorized key(s) found in the following location(s):
+/root/.ssh/authorized_keys:1,2
+Remove all authorized keys and share an updated AMI with authorized keys removed. Additional information is available at https://aws.amazon.com/articles/0155828273219400.
+
+2. Our scans couldn't be fulfilled. Please address all items included below.
+
+No access to AMI
+Access not granted to the AMI in the following location(s):
+us-east-1
+Share the AMI in the appropriate region before scanning.
+Status: Bad Request
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+//SFTP
+
+NOTE:: If you are installing NFS Server that will be using SFTP User. Please follow the below points.
+
+Create SFTP User first. Then mount the External HDD to /home/sftpuser.
+Once tested SFTP User through Filezilla, proceed with NFS Server Installation and Mounting NFS Drive on Client Instances.
+
+Before you start, as a precaution open at-least two terminal access to the server. If there is any problem during the configuration / mis configuration you can always use the other terminal login to revert back the changes.
+
+1. Create sftpuser
+sudo adduser sftpuser <sftp"projectname">  E.g. sudo adduser sftpaphos
+
+2. Create sftpusers group
+sudo groupadd sftp_users
+
+3. Add user to sftp_users group
+sudo usermod -G sftp_users sftpuser
+
+4. Jail the user to his home directory  
+sudo chown root:root /home/sftpuser/
+sudo chmod 755 /home/sftpuser/ 
+sudo chown sftpuser:sftpuser /home/sftpuser/site
+
+5. Open sshd config file '/etc/ssh/sshd_config' and edit the below line  
+Replace Subsystem sftp /usr/lib/openssh/sftp-server with below
+Subsystem sftp internal-sftp Change PasswordAuthentication 'no' to 'yes'
+
+6. Add the below lines at the end of the file
+Match Group sftp_users
+   X11Forwarding no
+   AllowTcpForwarding no
+  ChrootDirectory /home/sftpuser
+  ForceCommand internal-sftp
+
+7. NOTE:: Restart ssh service.
+sudo service ssh restart
+
+Once you are done with the above settings please cross verify the above settings, by connecting the instance using FileZilla for SFTP and Terminal for SSH Access. The user will not be able to connect through SSH Terminal, but the same user can connect through FileZilla.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//update and upgrade script for cron
+
+#!/bin/bash
+crontab -l > updatecron
+echo "0 1 * * * apt-get update && apt-get upgrade -y" >> updatecron
+crontab updatecron
+rm updatecron
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Installing LAMP
+
+1. sudo apt-get update
+2. sudo apt-get install apache2
+3. sudo update-rc.d apache2 enable
+4. sudo ufw allow in "Apache Full"
+5. sudo apt-get install mysql-server
+6. sudo apt-get install php libapache2-mod-php php-mcrypt php-mysql php-mbstring
+7. sudo nano /etc/apache2/mods-enabled/dir.conf
+8. sudo service apache2 restart
+9. sudo nano /var/www/html/info.php         //   <?php phpinfo();       
+10. sudo rm info.php
+11. sudo update-rc.d mysql enable
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Installing Phpmyadmin Ubuntu 16.04
+
+1. sudo apt-get update
+2. sudo apt-get install phpmyadmin php-mbstring php-gettext
+3. sudo phpenmod mcrypt
+4. sudo phpenmod mbstring
+5. sudo nano /etc/phpmyadmin/config-db.php 
+Enter DB Name, username and password.
+6. sudo service apache2 restart
+
+same for nginx but additional step:
+
+sudo ln -s /usr/share/phpmyadmin/ /var/www/html/phpmyadmin
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Script for automating mysql 5.7.16 and phpmyadmin root password
+
+#!/bin/bash
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo changing password to instance id for mysql
+mysql -u "root" -p"hello" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo Password changed for mysql
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Implement SSL on Ubuntu 16.04 LTS Apache
+
+1. sudo apt-get update
+2. sudo apt-get upgrade -y
+3. sudo a2enmod ssl
+4. sudo service apache2 restart
+5. sudo mkdir /etc/apache2/ssl
+6. sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
+7. sudo nano /etc/apache2/sites-available/default-ssl.conf
+8. Find these lines and change it to -- SSLCertificateFile /etc/apache2/ssl/apache.crt
+        				SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+9. sudo a2ensite default-ssl.conf
+10. sudo service apache2 restart
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//SFTP user (not working for /var/www/html)
+
+1. sudo adduser sftpuser
+2. sudo groupadd sftp_users
+3. sudo usermod -G sftp_users sftpuser
+4. sudo chown root:root /var/www/html
+5. sudo chmod 755 /var/www/html
+6. sudo chown sftpuser:sftpuser /var/www/html
+7. sudo nano /etc/ssh/sshd_config
+	a. Replace text with "Subsystem sftp internal-sftp"
+	b. Change PasswordAuthentication 'no' to 'yes'
+	c. Add the below lines at the end of the file
+		Match Group sftp_users
+  		X11Forwarding no
+   		AllowTcpForwarding no
+  		ChrootDirectory /var/www/html
+  		ForceCommand internal-sftp
+8. sudo service ssh restart
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Debug in shell Script
+
+bash -x ./script.sh
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//functions in shell script
+
+echoFunction() {
+  echo "echo is Called"
+}
+fooBar() {
+  echo "Functions are FUN!"
+}
+
+echoFunction;
+fooBar;
+echoFunction;
+# You call functions without (), just the function name then a semicolon.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//store and display a variable in shell script
+
+fooVar=$(who)
+echo $fooVar
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//if-else condition in shell script
+
+if [ $fruit = apple ]
+        then echo "Good, I like Apples"
+elif [ $fruit = pear ]
+        then echo "Good, I like Pears"
+elif [ $fruit = banana ]
+        then echo "Good, I like Bananas"
+        else echo "Oh no, I hate Oranges!"
+fi
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//how to take input from user in shell
+
+clear
+read -p "Please enter your name  : " name
+echo ""
+read -p "Please enter your age  : " age
+echo ""
+read -p "Please enter your sex. Male/Female  : " sex
+echo ""
+echo "So you're a $age year old $sex called $name"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//shell script for snapshot creation via terminal needs python-pip and aws-cli LAMP
+///https://github.com/CaseyLabs/aws-ec2-ebs-automatic-snapshot-bash
+
+#!/bin/bash
+export PATH=$PATH:/usr/local/bin/:/usr/bin
+
+# Safety feature: exit script if error is returned, or if variables not set.
+# Exit if a pipeline results in an error.
+set -ue
+set -o pipefail
+
+## Automatic EBS Volume Snapshot Creation & Clean-Up Script
+#
+# Contact us for all your Amazon Web Services Consulting needs!
+#
+#
+# PURPOSE: This Bash script can be used to take automatic snapshots of your Linux EC2 instance. Script process:
+# - Determine the instance ID of the EC2 server on which the script runs
+# - Gather a list of all volume IDs attached to that instance
+# - Take a snapshot of each attached volume
+# - The script will then delete all associated snapshots taken by the script that are older than 7 days
+#
+# DISCLAIMER: This script deletes snapshots (though only the ones that it creates). 
+# Make sure that you understand how the script works. No responsibility accepted in event of accidental data loss.
+#
+
+
+## Variable Declartions ##
+
+# Get Instance Details
+instance_id=$(wget -q -O- http://169.254.169.254/latest/meta-data/instance-id)
+region=$(wget -q -O- http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/\([1-9]\).$/\1/g')
+
+# Set Logging Options
+logfile="/var/log/ebs-snapshot.log"
+logfile_max_lines="5000"
+
+# How many days do you wish to retain backups for? Default: 7 days
+retday="10"
+retention_days="$retday"
+retention_date_in_seconds=$(date +%s --date "$retention_days days ago")
+
+## Function Declarations ##
+
+# Function: Setup logfile and redirect stdout/stderr.
+log_setup() {
+    # Check if logfile exists and is writable.
+    ( [ -e "$logfile" ] || touch "$logfile" ) && [ ! -w "$logfile" ] && echo "ERROR: Cannot write to $logfile. Check permissions or sudo access." && exit 1
+
+    tmplog=$(tail -n $logfile_max_lines $logfile 2>/dev/null) && echo "${tmplog}" > $logfile
+    exec > >(tee -a $logfile)
+    exec 2>&1
+}
+
+# Function: Log an event.
+log() {
+    echo "[$(date +"%Y-%m-%d"+"%T")]: $*"
+}
+
+# Function: Confirm that the AWS CLI and related tools are installed.
+prerequisite_check() {
+	for prerequisite in aws wget; do
+		hash $prerequisite &> /dev/null
+		if [[ $? == 1 ]]; then
+			echo "In order to use this script, the executable \"$prerequisite\" must be installed." 1>&2; exit 70
+		fi
+	done
+}
+
+# Function: Snapshot all volumes attached to this instance.
+snapshot_volumes() {
+	for volume_id in $volume_list; do
+		log "Volume ID is $volume_id"
+
+		# Get the attched device name to add to the description so we can easily tell which volume this is.
+		device_name=$(aws ec2 describe-volumes --region $region --output=text --volume-ids $volume_id --query 'Volumes[0].{Devices:Attachments[0].Device}')
+
+		# Take a snapshot of the current volume, and capture the resulting snapshot ID
+		#snapshot_description="$(hostname)-$device_name-backup-$(date +%Y-%m-%d)"
+		snapshot_description="$instance_id-$device_name-automated-backup"
+		snapshot_id=$(aws ec2 create-snapshot --region $region --output=text --description $snapshot_description --volume-id $volume_id --query SnapshotId)
+		log "New snapshot is $snapshot_id"
+	 
+		# Add a "CreatedBy:AutomatedBackup" tag to the resulting snapshot.
+		# Why? Because we only want to purge snapshots taken by the script later, and not delete snapshots manually taken.
+		aws ec2 create-tags --region $region --resource $snapshot_id --tags Key=CreatedBy,Value=AutomatedBackup
+	done
+}
+
+# Function: Cleanup all snapshots associated with this instance that are older than $retention_days
+cleanup_snapshots() {
+	for volume_id in $volume_list; do
+		snapshot_list=$(aws ec2 describe-snapshots --region $region --output=text --filters "Name=volume-id,Values=$volume_id" "Name=tag:CreatedBy,Values=AutomatedBackup" --query Snapshots[].SnapshotId)
+		for snapshot in $snapshot_list; do
+			log "Checking $snapshot..."
+			# Check age of snapshot
+			snapshot_date=$(aws ec2 describe-snapshots --region $region --output=text --snapshot-ids $snapshot --query Snapshots[].StartTime | awk -F "T" '{printf "%s\n", $1}')
+			snapshot_date_in_seconds=$(date "--date=$snapshot_date" +%s)
+			snapshot_description=$(aws ec2 describe-snapshots --snapshot-id $snapshot --region $region --query Snapshots[].Description)
+
+			if (( $snapshot_date_in_seconds <= $retention_date_in_seconds )); then
+				log "DELETING snapshot $snapshot. Description: $snapshot_description ..."
+				aws ec2 delete-snapshot --region $region --snapshot-id $snapshot
+			else
+				log "Not deleting snapshot $snapshot. Description: $snapshot_description ..."
+			fi
+		done
+	done
+}	
+
+
+## SCRIPT COMMANDS ##
+
+log_setup
+prerequisite_check
+
+# Grab all volume IDs attached to this instance
+volume_list=$(aws ec2 describe-volumes --region $region --filters Name=attachment.instance-id,Values=$instance_id --query Volumes[].VolumeId --output text)
+
+snapshot_volumes
+cleanup_snapshots
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//shell script for setting retention period for snapshot LAMP
+
+#!/bin/bash
+echo "press ctrl+c to exit!!!"
+echo Fetching current retention period......
+a="$(sed -n 36p /var/www/html/iscripts/snapshotscript.sh >> a.txt)";
+awk -F '"' '$0=$2' a.txt >> b.txt
+b="$(cat b.txt)";
+echo "Current retention period is $b days"
+read -p  "Please enter your new retention period in days : " rpd
+echo "The New retention period will be $rpd days"
+sed -i "36s|$b|$rpd|" /var/www/html/iscripts/snapshotscript.sh
+rm a.txt
+rm b.txt
+c="$(find . -type f -name sed\* -exec rm {} \;)"
+echo "Done !!!"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//shell script for automating mysql password LAMP
+
+#!/bin/bash
+echo Fetching instance id......
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete!!!!
+echo "changing password to instance id for mysql"
+mysql -u "root" -p"hello" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for mysql"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Repair corrupted ods file
+
+zip -F file.ods --out repaired_file.ods
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//LAMP base AMI Final Scripts
+
+1. backup.sh
+
+#!/bin/bash
+echo Starting cron.....
+crontab -l > updatecron1
+echo "0 2 * * * cd /var/www/html/iscripts && bash snapshotscript.sh" >> updatecron1
+crontab updatecron1
+rm updatecron1
+echo "updated entry in crontab"
+
+2. remove.sh 
+
+#!/bin/bash
+sleep 6m;
+rm -rf /var/www/html/iscripts/delscript
+rm /var/www/html/iscripts/remove.sh
+
+3. rp.sh
+
+#!/bin/bash
+clear
+echo "Press ctrl+c to exit!!!"
+echo "Welcome to Snapshot Management Console"
+echo Fetching current retention period......
+a="$(sed -n 36p /var/www/html/iscripts/snapshotscript.sh >> a.txt)";
+awk -F '"' '$0=$2' a.txt >> b.txt               #How to cut string between inverted commas
+b="$(cat b.txt)";
+echo "Current retention period is $b days"
+read -p  "Please enter your new retention period in days : " rpd
+echo "The New retention period will be $rpd days"
+sed -i "36s|$b|$rpd|" /var/www/html/iscripts/snapshotscript.sh
+rm a.txt
+rm b.txt
+c="$(find . -type f -name sed\* -exec rm {} \;)"
+echo "Creating snapshot...."
+bash /var/www/html/iscripts/snapshotscript.sh
+echo "Creating cron for daily backup at 2:00 AM UTC"
+echo "You can always edit the cron by typing sudo crontab -e"
+bash /var/www/html/iscripts/backup.sh
+echo "We have setup retention period, current snapshot creation and daily cron for you"
+
+4. sftpuser.sh
+
+#!/bin/bash
+clear
+read -p "Please enter the new password for sftpuser : " s
+echo "Changing SFTP password......"
+echo -e "$s\n$s" | passwd sftpuser
+echo "Password changed for sftpuser!!!!"
+
+5. update.sh 
+
+#!/bin/bash
+echo "Press ctrl+c to exit"
+echo Starting cron.....
+crontab -l > updatecron
+echo "Creating cron for daily update and upgrade at 1:00 am UTC"
+echo "You can always make changes in the cron by typing sudo crontab -e"
+echo "0 1 * * * apt-get update && apt-get upgrade -y" >> updatecron
+crontab updatecron
+rm updatecron
+echo "Finished setting up cron for daily update and upgrade!!!!"
+
+6. snapshotscript.sh
+
+#!/bin/bash
+export PATH=$PATH:/usr/local/bin/:/usr/bin
+
+# Safety feature: exit script if error is returned, or if variables not set.
+# Exit if a pipeline results in an error.
+set -ue
+set -o pipefail
+
+## Automatic EBS Volume Snapshot Creation & Clean-Up Script
+#
+# Contact us for all your Amazon Web Services Consulting needs!
+#
+#
+# PURPOSE: This Bash script can be used to take automatic snapshots of your Linux EC2 instance. Script process:
+# - Determine the instance ID of the EC2 server on which the script runs
+# - Gather a list of all volume IDs attached to that instance
+# - Take a snapshot of each attached volume
+# - The script will then delete all associated snapshots taken by the script that are older than 7 days
+#
+# DISCLAIMER: This script deletes snapshots (though only the ones that it creates). 
+# Make sure that you understand how the script works. No responsibility accepted in event of accidental data loss.
+#
+
+
+## Variable Declartions ##
+
+# Get Instance Details
+instance_id=$(wget -q -O- http://169.254.169.254/latest/meta-data/instance-id)
+region=$(wget -q -O- http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/\([1-9]\).$/\1/g')
+
+# Set Logging Options
+logfile="/var/log/ebs-snapshot.log"
+logfile_max_lines="5000"
+
+# How many days do you wish to retain backups for? Default: 7 days
+retday="7"
+retention_days="$retday"
+retention_date_in_seconds=$(date +%s --date "$retention_days days ago")
+
+## Function Declarations ##
+
+# Function: Setup logfile and redirect stdout/stderr.
+log_setup() {
+    # Check if logfile exists and is writable.
+    ( [ -e "$logfile" ] || touch "$logfile" ) && [ ! -w "$logfile" ] && echo "ERROR: Cannot write to $logfile. Check permissions or sudo access." && exit 1
+
+    tmplog=$(tail -n $logfile_max_lines $logfile 2>/dev/null) && echo "${tmplog}" > $logfile
+    exec > >(tee -a $logfile)
+    exec 2>&1
+}
+
+# Function: Log an event.
+log() {
+    echo "[$(date +"%Y-%m-%d"+"%T")]: $*"
+}
+
+# Function: Confirm that the AWS CLI and related tools are installed.
+prerequisite_check() {
+	for prerequisite in aws wget; do
+		hash $prerequisite &> /dev/null
+		if [[ $? == 1 ]]; then
+			echo "In order to use this script, the executable \"$prerequisite\" must be installed." 1>&2; exit 70
+		fi
+	done
+}
+
+# Function: Snapshot all volumes attached to this instance.
+snapshot_volumes() {
+	for volume_id in $volume_list; do
+		log "Volume ID is $volume_id"
+
+		# Get the attched device name to add to the description so we can easily tell which volume this is.
+		device_name=$(aws ec2 describe-volumes --region $region --output=text --volume-ids $volume_id --query 'Volumes[0].{Devices:Attachments[0].Device}')
+
+		# Take a snapshot of the current volume, and capture the resulting snapshot ID
+		#snapshot_description="$(hostname)-$device_name-backup-$(date +%Y-%m-%d)"
+		snapshot_description="$instance_id-$device_name-automated-backup"
+		snapshot_id=$(aws ec2 create-snapshot --region $region --output=text --description $snapshot_description --volume-id $volume_id --query SnapshotId)
+		log "New snapshot is $snapshot_id"
+	 
+		# Add a "CreatedBy:AutomatedBackup" tag to the resulting snapshot.
+		# Why? Because we only want to purge snapshots taken by the script later, and not delete snapshots manually taken.
+		aws ec2 create-tags --region $region --resource $snapshot_id --tags Key=CreatedBy,Value=AutomatedBackup
+	done
+}
+
+# Function: Cleanup all snapshots associated with this instance that are older than $retention_days
+cleanup_snapshots() {
+	for volume_id in $volume_list; do
+		snapshot_list=$(aws ec2 describe-snapshots --region $region --output=text --filters "Name=volume-id,Values=$volume_id" "Name=tag:CreatedBy,Values=AutomatedBackup" --query Snapshots[].SnapshotId)
+		for snapshot in $snapshot_list; do
+			log "Checking $snapshot..."
+			# Check age of snapshot
+			snapshot_date=$(aws ec2 describe-snapshots --region $region --output=text --snapshot-ids $snapshot --query Snapshots[].StartTime | awk -F "T" '{printf "%s\n", $1}')
+			snapshot_date_in_seconds=$(date "--date=$snapshot_date" +%s)
+			snapshot_description=$(aws ec2 describe-snapshots --snapshot-id $snapshot --region $region --query Snapshots[].Description)
+
+			if (( $snapshot_date_in_seconds <= $retention_date_in_seconds )); then
+				log "DELETING snapshot $snapshot. Description: $snapshot_description ..."
+				aws ec2 delete-snapshot --region $region --snapshot-id $snapshot
+			else
+				log "Not deleting snapshot $snapshot. Description: $snapshot_description ..."
+			fi
+		done
+	done
+}	
+
+
+## SCRIPT COMMANDS ##
+
+log_setup
+prerequisite_check
+
+# Grab all volume IDs attached to this instance
+volume_list=$(aws ec2 describe-volumes --region $region --filters Name=attachment.instance-id,Values=$instance_id --query Volumes[].VolumeId --output text)
+
+snapshot_volumes
+cleanup_snapshots
+
+7. delscript/mysql.sh
+
+#!/bin/bash
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+echo "Changing SFTP password to Instance Id"
+echo -e "$iid\n$iid" | passwd sftpuser
+echo "Password changed for SFTP"
+
+8. /etc/rc.local
+
+
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+bash /var/www/html/iscripts/delscript/mysql.sh
+bash /var/www/html/iscripts/remove.sh
+exit 0
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to create SFTP user in ubuntu 16.04 LTS (Working)
+
+1. sudo useradd sftpuser
+2. sudo passwd sftpuser
+3. sudo chown -R sftpuser:sftpuser /var/www/html  (Optional chmod 755)
+4. sudo nano /etc/passwd
+change the directory location
+5. sudo service ssh restart
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to change SFTP password using shell script (script for giving input on prompt)
+
+echo -e "linuxpassword\nlinuxpassword" | passwd linuxuser
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to install nodejs on ubuntu 16.04
+
+https://linuxconfig.org/how-to-install-node-js-on-ubuntu-16-04-xenial-xerus-linux-server
+
+1. sudo apt-get install add-apt-repository 
+2. sudo apt-get install python-software-properties
+3. sudo add-apt-repository -y -r ppa:chris-lea/node.js
+4. sudo curl --silent https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
+5. VERSION=node_7.x
+6. DISTRO="$(lsb_release -s -c)"
+7. sudo echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+8. sudo echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | sudo tee -a /etc/apt/sources.list.d/nodesource.list
+9. sudo apt-get update
+10. sudo apt-get install nodejs
+
+or
+
+1. sudo apt-get install python-software-properties
+2. curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+3. sudo apt-get install nodejs
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to install webmin
+
+1. Download it from official website.
+
+https://downloads.sourceforge.net/project/webadmin/webmin/1.831/webmin-1.831.tar.gz?r=http%3A%2F%2Fwww.webmin.com%2Fdownload.html&ts=1491547246&use_mirror=excellmedia
+
+2. sudo tar -xzvf webmin.tar.gz
+3. cd webmin
+4. sudo bash setup.sh
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Change password for webmin
+
+/webmin/changepass.pl /etc/webmin root NEWPASSWORD 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Scripts for phpbb in ubuntu 16.04LTS
+
+1. delscript/mysql.sh
+
+#!/bin/bash
+service mysql restart
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+echo "Changing SFTP password to Instance Id"
+echo -e "$iid\n$iid" | passwd sftpuser
+echo "Password changed for SFTP"
+echo "Changing password for webmin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid
+echo "Password Changed for webmin"
+
+2. delscript/phpbb/pass.sh
+
+#!/bin/bash
+bash phprun.sh;
+echo Fetching instance id
+ind="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+sleep 5s;
+p="$(cat pass.txt)"
+mysql -u "root" -p"$ind" -D "phpbb3" -e "UPDATE phpbb_users SET user_password='$p' WHERE username='admin';"
+echo "Password changed for phpbb"
+
+3. delscript/phpbb/phpcode.php
+
+<?php
+$id=exec("curl http://169.254.169.254/latest/meta-data/instance-id");
+$pass=password_hash($id, PASSWORD_DEFAULT);
+file_put_contents('/var/www/html/iscripts/delscript/phpbb/pass.txt', $pass);
+?>
+
+4. delscript/phpbb/phprun.sh 
+
+#!/bin/bash/php
+php /var/www/html/iscripts/delscript/phpbb/phpcode.php
+
+5. iscripts/webmin.sh
+
+#!/bin/bash
+echo "Password Management Console for Webmin"
+read -p "Enter the new password for webmin user admin : " wm
+/var/www/html/webmin/changepass.pl /etc/webmin admin $wm
+
+6. delscript/phpbb.sh                              (//find and replace text)
+
+#!/bin/bash
+echo Fetching instance id
+ipd="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+awk '{ if (NR == 9) print "$dbpasswd = '$ipd';"; else print $0}' /var/www/html/phpbb/config.php.bak > /var/www/html/phpbb/config.php 
+
+or 
+working
+#!/bin/bash
+echo Fetching instance id
+ipd="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+sed -i -e 's/hello/'$ipd'/g' /var/www/html/config.php
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to replace a specific line with different word/text
+Remember input and output file has to be different
+awk '{ if (NR == 4) print "different"; else print $0}' input_file.txt > output_file.txt
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Exit script on error (not tested)    http://www.davidpashley.com/articles/writing-robust-shell-scripts/#id2382181                                                                                        
+
+#!/bin/sh
+
+abort()
+{
+    echo >&2 '
+***************
+*** ABORTED ***
+***************
+'
+    echo "An error occurred. Exiting..." >&2
+    exit 1
+}
+
+trap 'abort' 0
+
+set -e
+
+# Add your script below....
+# If an error occurs, the abort() function will be called.
+#----------------------------------------------------------
+# ===> Your script goes here
+# Done!
+trap : 0
+
+echo >&2 '
+************
+*** DONE *** 
+************
+'
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Wordpress scripts
+
+1. wpip.sh
+
+#!/bin/bash
+sleep 5s;
+echo Fetching instance id
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)"
+echo Fetching Complete
+echo "Changing ip for wordpress"
+mysql -u "root" -p"$id" -D "wordpress" -e"update wp_options set option_value='http://$ip' where option_name = 'siteurl'; update wp_options set option_value='$
+
+
+2. wp.sh
+
+#!/bin/bash
+clear
+echo "Password Management Utility for Wordpress"
+read -p "Enter the DBusername : " dbu
+read -p "Enter the DBpassword : " dbp
+read -p "Enter the dbname : " dbn
+read -p "Enter the username : " wpu
+read -p "Enter the new password for your user : " wpp
+mysql -u "$dbu" -p"$dbp" -D "$dbn" -e "UPDATE wp_users SET user_pass=(md5('$wpp')) WHERE user_login ='$wpu';"
+echo "Password changed for user $wpp"
+
+3. mysql.sh 
+
+#!/bin/bash
+echo "Re-starting MYSQL service"
+service mysql restart
+sleep 2s;
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+/etc/webmin/start
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+echo "Changing WP db password"
+sed -i -e 's/hello/'$iid'/g' /var/www/html/wp-config.php
+sleep 2s;
+/etc/webmin/restart
+
+
+4. automatic security updates for wordpress
+
+In wp-config.php add this following line
+
+- add_filter( 'allow_minor_auto_core_updates', '__return_true' );
+
+5. wpdb.sh
+
+#!/bin/bash
+echo Fetching instance id
+ipd="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+mysql -u "root" -p"$ipd" -D "wordpress" -e "UPDATE wp_users SET user_pass=(md5('$ipd')) WHERE ID = '1';"
+
+
+6. old wp sh
+
+#!/bin/bash
+command="curl http://169.254.169.254/latest/meta-data/public-ipv4"
+eval $command
+ip=`eval $command`;
+echo $ip;
+MYSQL_USER=wp-user
+MYSQL_PASS=wp-password
+mysql --user="$MYSQL_USER" --password="$MYSQL_PASS" --database="wordpress" -e "update wp_options set option_value='http://$ip' where option_name = 'siteurl'; update wp_options set option_value='http://$ip' where option_name = 'home';"
+
+
+7. remember to delete wpip.sh in case of domain integration.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//MD5 hash in php converstion
+
+php -r "print( md5('$ipd')); print(\"\r\n\");"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Drupal Stack Scripts
+
+1. dpp.sh (for password changing)
+
+#!/bin/bash
+clear
+echo "Welcome to drupal password utility"
+read -p "Enter the DBusername : " dbu
+read -p "Enter the DBpassword : " dbp
+read -p "Enter the DBname : " dbn
+read -p "Enter the Drupal Username : " du
+read -p "Enter the New password for user $du : " dp
+x="$(php /var/www/html/core/scripts/password-hash.sh $dp)"
+y="$(echo $x | awk '{print $NF}')"
+mysql -u "$dbu" -p"$dbp" -D "$dbn" -e "UPDATE users_field_data SET pass ='$y' WHERE name = '$du';"
+echo "Password changed for user $du"
+
+2. mysql.sh (boot time)
+
+#!/bin/bash
+echo "Re-starting MYSQL service"
+service mysql restart
+sleep 2s;
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+/etc/webmin/start
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+sleep 5s;
+/etc/webmin/restart
+echo "Changing Drupal DB password"
+sed -i -e 's/hello123456/'$iid'/g' /var/www/html/sites/default/settings.php
+echo "Changing Password for Drupal user admin"
+x="$(php /var/www/html/core/scripts/password-hash.sh $iid)"
+y="$(echo $x | awk '{print $NF}')"
+mysql -u "root" -p"$iid" -D "drupal" -e "UPDATE users_field_data SET pass ='$y' WHERE uid = 1;"
+echo "Password changed for drupal user admin"
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Magneto AMI script
+
+1. mysql.sh
+
+#!/bin/bash
+echo "Re-starting MYSQL service"
+service mysql restart
+sleep 2s;
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+/etc/webmin/start
+sed -i -e 's/hello123456/'$iid'/g' /var/www/html/app/etc/env.php
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+sleep 5s;
+/etc/webmin/restart
+
+2. magento.sh
+
+#!/bin/bash
+echo Fetching instance id
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+mysql -u "root" -p"$id" -D "magento" -e "UPDATE admin_user SET password = CONCAT(SHA2('xxxxxxxx$id', 256), ':xxxxxxxx:1') WHERE username = 'admin';"
+
+3. magentoip.sh 
+
+#!/bin/bash
+echo Fetching instance id
+idd="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+mysql -u "root" -p"$idd" -D "magento" -e "update core_config_data set value = 'http://$ip/' where path = 'web/unsecure/base_url'; update core_config_data set value = 'https://$ip/' where path = 'web/secure/base_url';"
+rm -rf /var/www/html/var/cache/
+service apache2 restart
+
+4. webmin.sh
+
+#!/bin/bash
+echo "Password Management Console for Webmin"
+read -p "Enter the new password for webmin user admin : " wm
+/var/www/html/webmin/changepass.pl /etc/webmin admin $wm
+
+5. /etc/rc.local
+
+bash /var/www/html/iscripts/delscript/mysql.sh
+bash /var/www/html/iscripts/delscript/magento.sh
+bash /var/www/html/iscripts/magentoip.sh
+bash /var/www/html/iscripts/remove.sh
+sh bash /var/www/html/iscripts/magentocache.sh
+
+6. sudo crontab -e
+
+* * * * * /usr/bin/php /var/www/html/bin/magento cron:run | grep -v "Ran jobs by schedule" >> /var/www/html/var/log/magento.cron.log
+* * * * * /usr/bin/php /var/www/html/update/cron.php >> /var/www/html/var/log/update.cron.log
+* * * * * /usr/bin/php /var/www/html/bin/magento setup:cron:run >> /var/www/html/var/log/setup.cron.log
+
+7. magentocache.sh
+#!/bin/sh
+rm -rf /var/www/html/var/cache
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Nginx http and https configuration
+
+1. Create SSL on nginx.
+
+sudo mkdir /etc/nginx/ssl
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
+
+2. sudo nano /etc/nginx/sites-available/default
+
+# Default server configuration
+#
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+       	listen 443 ssl;
+	ssl_certificate /etc/nginx/ssl/nginx.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx.key;
+	
+	root /var/www/html;
+
+	# Add index.php to the list if you are using PHP
+	index index.php index.html index.htm index.nginx-debian.html;
+
+	server_name _;
+
+	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		try_files $uri $uri/ =404;
+	}
+	 location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Nginx php configuration
+
+1. sudo nano /etc/php/7.0/fpm/php.ini
+
+2. cgi.fix_pathinfo=0
+
+3. sudo systemctl restart php7.0-fpm
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Nginx reverse proxy 
+https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-16-04
+
+ location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+location /phpmyadmin {}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Nodejs AMI Scripts
+
+1. mysql.sh
+
+#!/bin/bash
+service mysql restart
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+/etc/webmin/start
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+sed -i -e 's/hello123456/'$iid'/g' /etc/phpmyadmin/config-db.php
+sudo pm2 start /var/www/html/hello.js
+
+2. /etc/rc.local
+
+/mysql.sh
+/remove.sh
+sudo pm2 start /../hello.js
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Django AMI Installation
+
+1. Install pip
+
+sudo apt-get install python-pip
+
+2. install django
+
+3. django-admin startproject projectname
+4. cd projectname
+5. cd projectname/projectname
+6. nano settings.py
+7. Make these changes 
+DATABASES = {
+'default': {
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': 'DB_NAME',
+    'HOST': 'localhost',
+    'PORT': '3306',
+    'USER': 'root',
+    'PASSWORD': '',
+}}
+
+8. sudo apt-get install libmysqlclient-dev
+9. pip install MySQL-python
+10. python manage.py migrate
+11.     python manage.py createsuperuser
+12. In settings.py  
+ALLOWED_HOSTS = ['your_server_domain_or_IP', 'second_domain_or_IP', . . .]
+13. python manage.py runserver 0.0.0.0:3000
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Django AMI
+
+1. /delscript/django.sh
+
+#!/bin/sh
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+sudo python /var/www/html/hello/manage.py shell -c "from django.contrib.auth.models import User; users = User.objects.all(); user = users[0]; user.set_password('$iid'); user.save();exit;"
+
+2. delscript/mysql.sh
+
+#!/bin/bash
+service mysql restart
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+/etc/webmin/start
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+sed -i -e 's/hello123456/'$iid'/g' /etc/phpmyadmin/config-db.php
+sed -i -e 's/hello123456/'$iid'/g' /var/www/html/hello/hello/settings.py
+
+3. djangoip.sh
+
+#!/bin/bash
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+sed -i -e 's/bye7890/'$ip'/g' /var/www/html/hello/hello/settings.py
+
+4. djangop.sh
+
+#!/bin/sh
+echo "Welcome to Password Management Utility for user admin"
+read -p "Enter the New Password for user admin : " p
+sudo python /var/www/html/hello/manage.py shell -c "from django.contrib.auth.models import User; users = User.objects.all(); user = users[0]; user.set_password('$p'); user.save();exit;"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//tomcat AMI
+
+https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-ubuntu-16-04
+
+1. mysql.sh
+
+#!/bin/bash
+echo "Re-starting MYSQL service"
+service mysql restart
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+/etc/webmin/start
+echo "Password changed for MYSQL"
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+sed -i -e 's/hello123456/'$iid'/g' /etc/phpmyadmin/config-db.php
+sudo service tomcat start
+sed -i -e 's/hello123456/'$iid'/g' /var/www/html/tomcat/conf/tomcat-users.xml
+sudo service tomcat restart
+
+2. 000-default (proxy http apache) //how to use reverse proxy in apache
+ 
+<VirtualHost *:80>
+        
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        #ProxyRequests On
+        ProxyPass /phpmyadmin !
+        ProxyPass / http://localhost:8080/
+        ProxyPassReverse / http://localhost:8080/
+
+        
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+
+3. default-ssl (proxy https apache)
+
+
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:443>
+                ServerAdmin webmaster@localhost
+
+                DocumentRoot /var/www/html
+
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+               
+                ProxyPass /phpmyadmin !
+                ProxyPass / http://localhost:8080/
+                ProxyPassReverse / http://localhost:8080/
+               
+                SSLEngine on
+
+                SSLCertificateFile      /etc/apache2/ssl/apache.crt
+                SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to find pid with port no
+
+sudo lsof -i:5858
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Print last column
+
+awk '{print $NF}'
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Mean Stack Scripts
+
+1. meanp.sh
+
+#!/bin/bash
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+id="$(sudo node /var/www/html/iscripts/delscript/pass/index.js $iid)";
+echo -e "$id" | awk '{print $NF}' > /var/www/html/iscripts/delscript/a.txt;
+## $a will give salt
+a="$(head -1 /var/www/html/iscripts/delscript/a.txt)";
+#echo $a;
+## $b will give hashed password
+b="$(sed -n 2p /var/www/html/iscripts/delscript/a.txt)";
+rm /var/www/html/iscripts/delscript/a.txt
+#echo $b;
+sudo mongo "localhost:27017/mean-dev" --eval 'db.users.update({ "email" : "admin@example.com" }, { $set: { "salt" : "'$a'", "hashed_password" : "'$b'" }})';
+echo "Password changed for mean user admin@example.com for mean stack";
+exit;
+
+2. mean status
+
+
+    MEAN Status
+    -----------
+
+    MEAN VERSION: 1.0
+
+    DB connection successful!
+
+    MongoDB URI: mongodb://localhost/mean-dev
+
+    checking meanio and global mean-cli versions
+    mean-cli at latest version: 0.12.15
+    meanio at latest version: 0.9.4
+    mongodb: 2.6.10
+    nginx: 1.10.0
+    	
+3. mongoep.sh
+
+#!/bin/bash
+echo Fetching instance id
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+sed -i -e 's/hello123456/'$id'/g' /var/www/html/mongo-express/config.js
+echo "Password changed for mongo-express user admin"
+
+4. index.js
+
+var crypto = require('crypto');
+var saltOld =crypto.randomBytes(16).toString('base64');
+var id = process.argv[2];
+data(id);
+function data(password) {
+  if (!password || !saltOld) return '';
+  var salt = new Buffer(saltOld, 'base64');
+console.log(salt.toString('base64'));
+console.log(crypto.pbkdf2Sync(password, salt, 10000, 64).toString('base64'));  
+};
+
+5. pm.sh
+
+#!/bin/bash
+sudo pm2 delete 1 0;
+cd /var/www/html/hello/ && sudo pm2 start server.js && sudo pm2 start /var/www/html/mongo-express/app.js;
+exit;
+
+6. webminp.sh
+
+#!/bin/bash
+ipd="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+sudo /etc/webmin/start;
+sudo /etc/webmin/restart;
+sudo /var/www/html/webmin/changepass.pl /etc/webmin admin $ipd;
+sudo /etc/webmin/restart
+
+7. /etc/rc.local
+
+#!/bin/sh -e
+service nginx start;
+service mongodb start;
+sleep 30s;
+sh /var/www/html/iscripts/delscript/meanp.sh;
+sh /var/www/html/iscripts/delscript/mongoep.sh;
+sh /var/www/html/iscripts/delscript/webminp.sh;
+sh /var/www/html/iscripts/pm.sh;
+sleep 4m;
+rm -rf /var/www/html/iscripts/delscript
+exit 0
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to keep a server running forever
+
+sudo ./xyyyyzzz.sh &
+sudo sh xyyzz.sh &
+sudo nohup node server.js
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to install redmine
+
+http://www.redmine.org/projects/redmine/wiki/HowTo_Install_Redmine_on_Ubuntu_step_by_step
+(admin)
+cd3db9c65de97aa65821e8a2fe2353509f899360
+2b8f233619288015bf8072a0d2903c82
+
+(sha1(sha1('password')))
+
+1. redmine.sh
+
+#!/bin/bash
+clear
+echo "Password Management Utility for redmine"
+read -p "Enter the DBusername : " dbu
+read -p "Enter the DBpassword : " dbp
+read -p "Enter the dbname : " dbn
+read -p "Enter the username : " wpu
+read -p "Enter the new password for your user : " wpp
+mysql -u "$dbu" -p"$dbp" -D "$dbn" -e "UPDATE users SET hashed_password=(sha1(sha1('$wpp'))) WHERE login = '$wpu';"
+echo "Password changed for user $wpp"
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to remove indexing in apache2
+
+<Directory /var/www/html>
+   Options -Indexes
+ </Directory>
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// moodle
+
+URL: http://idroot.net/linux/install-moodle-ubuntu-16-04-lts/
+
+manual entry after login into db: 
+SET default_storage_engine=INNODB;
+SET GLOBAL innodb_file_per_table = 1;
+SET GLOBAL innodb_file_format = Barracuda;
+
+$2y$10$9p8OYDwZjbyIb7bMyoTQtOviunO3Oft7cL1lBDMxgNewkOklKX7M6
+
+//Find and replace at particular line
+
+sed -i "36s|$b|$rpd|" /var/www/html/iscripts/snapshotscript.sh
+
+1. /delscript/moodlep.sh
+
+#!/bin/bash
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+a="$(sed -n '12p' /var/www/html/moodle/config.php)";
+b='$CFG->dbpass   =  "'$id'";';
+sed -i "12s|$a|$b|" /var/www/html/moodle/config.php;
+echo "DB Password changed for Moodle"
+
+2. moodle.sh
+
+#!/bin/bash
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+a="$(sed -n '20p' /var/www/html/moodle/config.php)";
+b='$CFG->wwwroot   =  "http://'$ip'/moodle";';
+sed -i "20s|$a|$b|" /var/www/html/moodle/config.php;
+echo "IP changed for Moodle"
+
+3. delscript/mysql.sh
+
+#!/bin/bash
+echo "Re-starting MYSQL service"
+service mysql restart
+sleep 2s;
+echo Fetching instance id
+iid="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+echo "Changing password to instance id for mysql"
+mysql -u "root" -p"root" -D "mysql" -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$iid');"
+echo "Password changed for MYSQL"
+/etc/webmin/start
+echo "Changing password for webmin user admin"
+/var/www/html/webmin/changepass.pl /etc/webmin admin $iid;
+sleep 5s;
+/etc/webmin/restart
+sed -i -e 's/hello123456/'$iid'/g' /etc/phpmyadmin/config-db.php
+
+4. delscript/moodleup.sh
+
+#!/bin/bash
+echo "Featching Instance id"
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+mysql -u "root" -p"$id" -D "moodle" -e "UPDATE mdl_user SET password=(md5('$id')) WHERE username = 'admin';"
+
+5. moodlep.sh
+
+#!/bin/bash
+clear
+echo "Password Management Utility for Moodle"
+read -p "Enter the DBusername : " dbu
+read -p "Enter the DBpassword : " dbp
+read -p "Enter the dbname : " dbn
+read -p "Enter the username : " wpu
+read -p "Enter the new password for your user : " wpp
+mysql -u "$dbu" -p"$dbp" -D "$dbn" -e "UPDATE mdl_user SET password=(md5('$wpp')) WHERE username = '$wpu';"
+echo "Password Successfully changed for user $wpu"
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// OwnCloud 
+
+URL: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-owncloud-on-ubuntu-16-04
+
+ownCloud 9.1.4 (stable)
+1|$2y$10$vgQwGvOTfcXCE5VOrt4dk.7jRIsH2oNUFGmlJzp/kJe1weaHIafH2
+
+1. owncloudip.sh
+
+#!/bin/bash
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+a="$(sed -n '9p' /var/www/owncloud/config/config.php)";
+b="0 => '$ip',"
+sed -i "9s|$a|$b|" /var/www/owncloud/config/config.php;
+c="$(sed -n '12p' /var/www/owncloud/config/config.php)";
+d="'overwrite.cli.url' => 'http://$ip/owncloud',"
+sed -i "12s|$c|$d|" /var/www/owncloud/config/config.php;
+echo "IP changed for ownCloud"
+
+2. delscript/owncloudp.sh
+
+#!/bin/bash
+echo "Featching Instance id"
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo Fetching Complete
+mysql -u "root" -p"$id" -D "owncloud" -e "UPDATE oc_users SET password=(sha1('$id')) WHERE uid = 'admin';"
+
+3. owncloud.sh
+
+#!/bin/bash
+clear
+echo "Password Management Utility for ownCloud"
+read -p "Enter the DBusername : " dbu
+read -p "Enter the DBpassword : " dbp
+read -p "Enter the dbname : " dbn
+read -p "Enter the username : " wpu
+read -p "Enter the new password for your user : " wpp
+mysql -u "$dbu" -p"$dbp" -D "$dbn" -e "UPDATE oc_users SET password=(sha1('$wpp')) WHERE uid = '$wpu';"
+echo "Password Successfully changed for user $wpu"
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//ruby on rails
+
+https://gorails.com/setup/ubuntu/16.04
+
+ruby 2.4
+node 4.8
+rails 5.0.1
+
+apache2 as proxy
+
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+
+secret for prod
+RAILS_ENV=production rake secret
+export SECRET_KEY_BASE=code
+0944ef99a77da906f69fca50888702b7be422b5cfbf4a846dfdb47c2268e32e3dce33ef767b39b55389abdf2b1897bb1126f368b42d10fe88efe1de0198c1579
+
+passenger
+https://www.phusionpassenger.com/library/install/nginx/install/oss/xenial/
+
+----
+Lastest install
+/etc/rc.local
+
+ruby /path/to/your/app/bin/rails s -b0.0.0.0 -P /path/to/your/app/tmp/pids/server.pid -c /path/to/your/app/config.ru -d
+
+1. railsp.sh
+
+#!/bin/bash
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+a="$(sed -n '17p' /home/ubuntu/myapp/config/database.yml)";
+b="\ \ password: $id"
+sed -i "17s|$a|$b|" /home/ubuntu/myapp/config/database.yml;
+
+2. /etc/rc.local
+
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+bash /var/www/html/iscripts/delscript/mysql.sh
+bash /var/www/html/iscripts/remove.sh
+bash /var/www/html/iscripts/delscript/railsp.sh
+cd /home/ubuntu/myapp/ && /home/ubuntu/.rbenv/shims/ruby /home/ubuntu/myapp/bin/rails s -b0.0.0.0 -P /home/ubuntu/myapp/tmp/pids/server.pid -c /home/ubuntu/myapp/config.ru -d
+exit 0
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// run script or command as different user in ubuntu
+
+su -c "Your command right here" -s /bin/sh username
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+//OrangeHRM 3.3.3
+
+Download URL:
+https://downloads.sourceforge.net/project/orangehrm/stable/3.3.3/orangehrm-3.3.3.zip?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Forangehrm%2F%3Fsource%3Dtyp_redirect&ts=1487917392&use_mirror=netassist
+
+Install URL:
+https://hostpresto.com/community/tutorials/how-to-install-orangehrm-on-ubuntu-14-04/
+
+/etc/mysql/mysql.conf.d/mysqld.conf        #mysql config file
+
+php 5.5.9
+mysql 5.6.33
+phpmyadmin 4.0
+webmin 1.8
+orangehrm 3.3.3
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Install php5.6 and php 7 together on Ubuntu 16.04
+
+http://askubuntu.com/questions/761713/how-can-i-downgrade-from-php-7-to-php-5-6-on-ubuntu-16-04
+
+1. sudo a2dismod proxy_fcgi proxy 
+2. sudo service apache2 restart
+3. sudo apt-get install ibapache2-mod-php
+4. sudo add-apt-repository ppa:ondrej/php
+5. sudo apt-get update
+6. sudo apt-get install php7.0 php5.6 php5.6-mysql php-gettext php5.6-mbstring php-mbstring php7.0-mbstring php-xdebug libapache2-mod-php5.6 libapache2-mod-php7.0
+7. From php7.0 to php5.6 : 
+
+- sudo a2dismod php7.0 
+- sudo a2enmod php5.6 
+- sudo service apache2 restart
+- sudo update-alternatives --set php /usr/bin/php5.6
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to schedule MySQL Query using MySQL event in phpMyAdmin?
+
+https://vijaymrami.wordpress.com/2016/01/28/how-to-schedule-mysql-query-using-mysql-event-in-phpmyadmin/
+
+1. login in phpmyadmin and select mysql database and then click on sql.
+
+2. SELECT @@event_scheduler;
+
+3. SET GLOBAL event_scheduler := 1;
+
+4. SHOW PROCESSLIST;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//openfire
+Ref: http://www.meestuff.com/install-openfire-ubuntu-16-04-lts-server/
+ref1: https://www.thefanclub.co.za/how-to/how-setup-im-voip-server-using-openfire-ubuntu-1404
+
+Website: https://www.igniterealtime.org/downloads/
+Download urls: https://www.igniterealtime.org/downloadServlet?filename=openfire/openfire_4.1.3_all.deb
+
+
+openfire 4.1.3
+storedKey : wFz4QcBpvTJDWh59mzV6Dxguh5U=
+
+serverKey: 6NDg8mcMQsakMClplb0s01UiuSI=
+
+salt: rqAc/fluMJPU63HU44llTErpxBkavCHT
+
+encryptedPassword : dc0f19327bb41c237d8900ae8b2bbd4725da0ed9ecba3901
+
+
+---
+database.defaultProvider.password : c825defa14578a23d9184981cc2685f0583bb03148e102bf09ba7cc3afc8121853f186ce7be34436fd4fd8bcdc29a27a
+
+database.defaultProvider.username : 31f6c7d1d5029026a5aa8db3717abf4720228d30a9336766
+
+passwordKey: 2sk9Oz7RWwdGvEh
+
+rewriteBatchedStatements=true
+
+87ce28f1868413a0c439e691fc737ea6717746f1e8656721
+d6071835dc1cb008aa0e471b0bcb4510be4f276c5dcda5fa6d83c39b04ff713a77f7e2246255da709822d59072582bbd
+---
+
+
+
+new
+jMz15UTd+30DVc5uZfXg5g==
+I/gyCX7Pl/+5sxJKRpiMwIvGaidL/KZKS4MR0jjXH/M=
+
+
+delete passwordKey
+use plain
+
+----
+Always use blowfish
+1. delscript/openfirep.sh 
+
+#!/bin/bash
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+mysql -u "root" -p"$id" -D "openfire" -e "UPDATE ofUser SET plainPassword=('$id') WHERE username = 'admin';UPDATE ofProperty SET propValue=('$id') where name='database.defaultProvider.password';"
+
+
+2. /etc/rc.local
+
+#!/bin/sh 
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+bash /var/www/html/iscripts/delscript/mysql.sh
+bash /var/www/html/iscripts/delscript/openfirep.sh
+sleep 10s;
+sudo service mysql restart
+sudo /etc/init.d/openfire start
+bash /var/www/html/iscripts/remove.sh
+exit 0
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to use nano 
+
+export VISUAL=nano; crontab -e
+
+or
+
+nano filename
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Chef Tutorial
+
+1. mkdir ~/chef-repo
+
+2. cd ~/chef-repo
+
+3. nano hello.rb  (how to create a file in chef recipe)
+
+file '/tmp/motd' do
+  content 'hello world'
+end
+
+4. chef-client --local-mode hello.rb (how to run chef on locally)
+
+5. more /tmp/motd
+
+6. chef-client --local-mode hello.rb
+
+7. nano hello.rb
+
+file '/tmp/motd' do
+  content 'hello chef'
+end
+
+8. chef-client --local-mode hello.rb
+
+9. echo 'hello robots' > /tmp/motd
+
+10. chef-client --local-mode hello.rb
+
+11. nano goodbye.rb
+
+file '/tmp/motd' do
+  action :delete
+end
+
+12. more /tmp/motd (view contents of file in chef)
+
+13. nano hello.rb
+
+directory '/tmp/msg'                         (create a directory in chef)
+
+file '/tmp/msg/motd' do
+	content 'hello there'
+end
+
+14. more /tmp/msg/motd/
+---
+15. nano webserver.rb
+
+apt_update 'Update the apt cache daily' do                
+  frequency 86_400
+  action :periodic
+end
+
+package 'apache2'
+
+16. sudo chef-client --local-mode webserver.rb (sudo is required to install the packages)
+
+17. sudo chef-client --local-mode webserver.rb
+
+18. nano webserver.rb
+
+apt_update 'Update the apt cache daily' do
+  frequency 86_400
+  action :periodic
+end
+
+package 'apache2'
+
+service 'apache2' do
+  supports :status => true
+  action [:enable, :start]
+end
+
+19. sudo chef-client --local-mode webserver.rb
+
+20. nano webserver.rb
+
+apt_update 'Update the apt cache daily' do                         (create a cache update script in chef)
+  frequency 86_400
+  action :periodic
+end
+
+package 'apache2'                                         (install apache2 package in chef)
+
+service 'apache2' do                                      (enable apache2 on boot in chef)
+  supports :status => true
+  action [:enable, :start]
+end
+
+file '/var/www/html/index.html' do                      (create a file in chef)
+  content '<html>
+  <body>
+    <h1>hello world</h1>
+  </body>
+</html>'
+end
+
+21. sudo chef-client --local-mode webserver.rb
+
+---
+22. mkdir cookbooks
+
+23. chef generate cookbook cookbooks/learn_chef_apache2                               (create cookbook in chef)
+
+24. sudo apt-get install tree
+
+25. tree cookbooks
+
+26. chef generate template cookbooks/learn_chef_apache2 index.html                 (create template in chef)
+ 
+27. tree cookbooks
+
+28. nano cookbooks/learn_chef_apache2/template/index.html.erb
+
+<html>
+  <body>
+    <h1>hello world</h1>
+  </body>
+</html>
+
+29. nano cookbooks/learn_chef_apache2/recipes/default.rb
+
+apt_update 'Update the apt cache daily' do
+  frequency 86_400
+  action :periodic
+end
+
+package 'apache2'
+
+service 'apache2' do
+  supports :status => true
+  action [:enable, :start]
+end
+
+template '/var/www/html/index.html' do         (how to copy template contents to index.html)
+  source 'index.html.erb'
+end
+
+30. sudo chef-client --local-mode --runlist 'recipe[learn_chef_apache2]'
+
+31. curl localhost
+-------------------------------------------------------
+
+Tutorial 2
+
+1. mkdir ~/learn-chef
+2. cd ~/learn-chef  
+3. sudo apt-get install git
+4. mkdir ~/learn-chef/.chef
+5. nano knife.rb
+
+# See http://docs.chef.io/config_rb_knife.html for more information on knife configuration options
+
+current_dir = File.dirname(__FILE__)
+log_level                :info
+log_location             STDOUT
+node_name                "mimum"
+client_key               "#{current_dir}/mimum.pem"
+chef_server_url          "https://api.chef.io/organizations/helloexample"
+cookbook_path            ["#{current_dir}/../cookbooks"]
+
+URL: https://learn.chef.io/tutorials/manage-a-node/ubuntu/hosted/set-up-your-chef-server/
+
+6. nano username.pem (mimum in this case)
+
+-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEA4LdckHnRPIYweL6gnGnrNIBhBhjNaoqcBqK9OKPr1My+fl9z
+UnU+QcLEYrqBR0ITxacML5NihXCb7iQPwbgiKyulMkYPO6HMp8B89ILn4MTyfrDU
+KGiBsPcttxuLZuDXIsyhg+0omfaG8iJqTXUIbIoEJKxLaE6hAJdIEZ9u2N/0TN7c
+Oh27gL8jfhjAVhPxLnBu6Qbfx0hhRgjUb+/DcFMEK+iBI/PCcV3LXRlvhlOkQ9TT
+0PjgxME1XjjHSxhoNiHDdXPLinSKlhm8IR6s+A5mco8jqoZ//kTlswWs8nE/OYRt
+chu7NM6OjiRmmqQRCpG2ZOu6L9VVsqUqlI0ukQIDAQABAoIBACaDRnn8Zr/Yv7Xx
+9dTY0lbNKdPBrHL2DoeUnJl4fpKaBIvkD/+x2Fms57uD+2QbDwhw+MWunNQB2LeX
+tpuc0z5S3J0hJLszn7+gXcoKJXOATY8o/zNttcx+kHcxYVLgdf6g042ot6yrc7VL
+8KwVwrvXa55daQ8XasCPLOrYSEciyI6vdIjW2DNatkLx+rQBKMUYYfaSNT7C4GcA
++jk5VMqO9OP5Pp2O1rVXW5OCk14UEb7SJccKJVC/Wwz+puaCJCjDmEkFOrfg7qVC
+HrYHR7GCXdAN98mzIZCdS/NnPI2Or+raW0g3+uy2TtRADE5C9Vtl9cjnJMbMuG6o
+/ZO0AAECgYEA+zIaJycx8DHtEMmapT6tOLyYKATuim3LcYCOnXtKvY6RoPPLsjLO
+B9PhZcIv7jrrWAKcSNMU1/5Y82Itr2OGSLzywaW9JHRT5inFVnh0f0KwToLwC7Gm
+XfhyXgpJrPcTcvg1N6BccHIyNU/6r4YwfFKimHjv0CMA4DX4Pex2nYECgYEA5QOc
+hRzfXyHmRoq7bKRCU6cPi9aB0a5FhoVDfGAkVsAewZpAfLxT8fM6XssXTAmYzaXI
+HnmENWGmtmXxHORyhJqOhv5yvQhefOW/hTMajLAIaTPpTtzpW448XPn70Y8qzSG2
+oymPFWk85/Qo+R/F6hbbCG6bVDd2ZBaI6FsbORECgYA4eEny1VffpImjxX6zeUSd
+xZ/7Fyi9C/O5X2owMwBZXsyUP1pihBNXJSW9p4r45lvz3BpgMLu11uMOS9rzW89b
+WMbGC8lagaA+1NMdHlUqKsbRz5PBPT2mUGz9gRiQ/rZrmSr1h2JgkPuCiqlTfjo2
+KKmO11kqFERlIxzcZuU/gQKBgFdvGonjrRBIA/+4pbfjuoLvjErqOaQRMfAa3toU
+ZqtMLDHkL2ywBiigoQ9h4GIiY9lXyuB/qk8rGhgXMYfDXEluLK4zZSDwmgp7OLSk
+/yTpbDymGhQG2X0f/8HLmy21yDSLA4ylqEAXbq5sFFyQmeI2madNezYa+rNZuyli
+5zDRAoGAN93LttJt0QDlm4nxxRYEFg1ueL7yRCwRfpfab06v0zimqgBYPdMrgkWN
+NAGo8DpSG9SIMWssE3mjV93QLusAZiBS7GZbVPDOubr1gDagG7ys4w2PVMdImapz
+j6dF3Hj19kaHFjzwaa/NNJoTKHZnN0imqwPkoX7xcy8W7HPH1X8=
+-----END RSA PRIVATE KEY-----
+
+7. knife ssl check
+-----
+8. mkdir ~/learn-chef/cookbooks
+
+9. cd cookbooks
+
+10. git clone https://github.com/learn-chef/learn_chef_apache2.git
+
+11. knife cookbook upload learn_chef_apache2
+
+12. knife cookbook list
+-----
+13. create a node and install chefdk and create a sudo user with password. 
+https://www.digitalocean.com/community/tutorials/how-to-create-a-sudo-user-on-ubuntu-quickstart 
+
+Edit /etc/ssh/sshd_config and set PasswordAuthentication to yes
+
+sudo /etc/init.d/ssh reload
+
+14. knife bootstrap 54.205.131.23 --ssh-user nodeuser --ssh-password 'test@123' --sudo --use-sudo-password --node-name node1-ubuntu --run-list 'recipe[learn_chef_apache2]'
+
+15. nano learn_chef_apache2/templates/index.html.erb 
+
+<html>
+  <body>
+    <h1>hello from <%= node['fqdn'] %></h1>
+  </body>
+</html>
+
+16. nano learn_chef_apache2/metadata.rb
+
+name 'learn_chef_apache2'
+maintainer 'ash'
+maintainer_email 'root@localhost'
+license 'all_rights'
+description 'Installs/Configures learn_chef_apache2'
+long_description 'Installs/Configures learn_chef_apache2'
+version '0.1.1'            
+ 
+17. knife cookbook upload learn_chef_apache2
+
+18. knife ssh 'name:node1-ubuntu' 'sudo chef-client' --ssh-user nodeuser --ssh-password 'test@123' --attribute cloud.public_hostname
+
+if you made any changes change metadata and reupload your cookbook and knife ssh
+
+19. nano /Berksfile
+
+source 'https://supermarket.chef.io'
+cookbook 'chef-client'
+
+20. berks install
+
+21. berks upload
+
+22. mkdir /learn-chef/roles
+
+23. nano learn-chef/roles/web.json
+
+{
+   "name": "web",
+   "description": "Web server role.",
+   "json_class": "Chef::Role",
+   "default_attributes": {
+     "chef_client": {
+       "interval": 300,
+       "splay": 60
+     }
+   },
+   "override_attributes": {
+   },
+   "chef_type": "role",
+   "run_list": ["recipe[chef-client::default]",
+                "recipe[chef-client::delete_validation]",
+                "recipe[learn_chef_apache2::default]"
+   ],
+   "env_run_lists": {
+   }
+}
+
+24. knife role from file roles/web.json
+
+25. knife role list
+
+26. knife role show web
+
+27. knife node run_list set node1-ubuntu "role[web]"
+
+28. knife node show node1-ubuntu --run-list
+
+29. knife ssh 'role:web' 'sudo chef-client' --ssh-user nodeuser --attribute cloud.public_hostname
+
+----------------------------------
+https://github.com/test-kitchen/kitchen-docker
+1. .kitchen.yml
+
+<% # Make sure the local copy of the driver is loaded %>
+<% lib = File.expand_path('../lib', __FILE__) %>
+<% $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib) %>
+---
+driver:
+  name: docker
+
+provisioner:
+  name: dummy
+
+platforms:
+- name: ubuntu-14.04
+  run_list:
+  - recipe[apt]
+
+suites:
+  - name: default
+
+verifier:
+    name: inspec
+
+----------------------------
+
+1. mkdir cookbooks
+
+2. chef generate cookbook cookbooks/awesome_customers_ubuntu
+
+3. install git
+
+4. cd cookbooks/awesome_customers_ubuntu
+
+5. git init
+
+6. git pull https://github.com/test-kitchen/kitchen-docker.git
+
+7. install docker from https://docs.docker.com/engine/installation/linux/ubuntu/
+
+http://www.rubydoc.info/gems/kitchen-docker/0.12.0
+//how to use docker in chef
+set ruby home path.
+
+export $PATH=PATH:/path/to/ruby/bin
+
+gem install kitchen-docker
+
+Edit the .kitchen.yml and change driver as docker.
+
+also add :
+
+platforms:
+- name: ubuntu-16.04
+  driver_config:
+    image: ubuntu:16.04
+    platform: ubuntu
+
+Install docker.
+
+
+8. edit the .kitchen.yml file  (don't)
+
+<% # Make sure the local copy of the driver is loaded %>
+<% lib = File.expand_path('../lib', __FILE__) %>
+<% $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib) %>
+---
+driver:
+  name: docker
+
+provisioner:
+  name: chef_zero
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[awesome_customers_ubuntu::default]
+    attributes:
+
+
+9. kitchen list
+
+10. berks install
+
+11. kitchen converge
+
+12. nano ~/learn-chef/cookbooks/awesome_customers_ubuntu/metadata.rb
+
+name 'awesome_customers_ubuntu'
+maintainer 'The Authors'
+maintainer_email 'you@example.com'
+license 'all_rights'
+description 'Installs/Configures awesome_customers_ubuntu'
+long_description 'Installs/Configures awesome_customers_ubuntu'
+version '0.1.0'
+
+depends 'apt', '~> 4.0'
+
+13. 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Discourse Development AMI
+
+Installation page: https://meta.discourse.org/t/beginners-guide-to-install-discourse-on-ubuntu-for-development/14727
+Also, apt-get install advancecomp gifsicle jhead jpegoptim jpeg optipng pngcrush pngquant
+Also, dont start mailserver
+How to access postgres with shell script
+
+1. /root/discourse/discoursedbp.sh
+
+#!/bin/bash
+echo "Fetching Instance ID.."
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo "Instance ID Fetched..."
+DATABASE=discourse_development
+USERNAME=root
+HOSTNAME=localhost
+export PGPASSWORD=admin123
+echo "Accessing DB and CHanging root password"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+ALTER ROLE root WITH PASSWORD '$id';
+EOF
+
+2. discourseup.sh 
+
+#!/bin/bash
+bash /root/discourse/drb.sh >> /root/discourse/a.txt
+a="$(sed -n '23p' /root/discourse/a.txt)";
+b="$(sed -n '26p' /root/discourse/a.txt)";
+#a="$(awk 'NR==23' /root/discourse/a.txt)";
+#b="$(awk 'NR==26' /root/discourse/a.txt)";
+#echo $a;
+#echo $b
+DATABASE=discourse_development
+USERNAME=root
+HOSTNAME=localhost
+export PGPASSWORD=admin123
+echo "Accessing DB and Changing root password"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+UPDATE users SET password_hash=('$a') WHERE id = '1';
+UPDATE users SET salt=('$b') WHERE id = '1';
+EOF
+rm /root/discourse/a.txt
+
+3. discoursep.sh (delete on boot) pass is admin123
+
+#!/bin/bash
+echo "Fetching Instance ID............"
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo "Instance ID Fetched !!!"
+DATABASE=discourse_development
+USERNAME=root
+HOSTNAME=localhost
+export PGPASSWORD=admin123
+echo "Accessing DB and Changing root password"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+UPDATE users SET password_hash=('c93cc699fee6b09b4a8ae290fe1763938540ef274e397fa3d2f325e0f8304f3c') WHERE id = '1';
+UPDATE users SET salt=('c786ab4bec11b5043235bc96e14f5685') WHERE id = '1';
+EOF
+
+4. drb.sh (password cracked)
+
+#!/bin/bash
+cd /root/discourse/ 
+irb <<EOF
+@a = "`curl http://169.254.169.254/latest/meta-data/instance-id`"
+require "securerandom"
+@password = @a
+@salt = SecureRandom.hex(16)
+@iterations = 64000
+@digest = OpenSSL::Digest::SHA256.new
+@key_length = @digest.length
+@password = OpenSSL::PKCS5.pbkdf2_hmac(@password, @salt, @iterations, @key_length, @digest).unpack("H*")
+a = @password[0]
+b = @salt
+puts "#{a}"
+puts "#{b}"
+EOF
+
+postgres sql 9.5.6
+
+UPDATE users SET password_hash=('admin1234') WHERE id = '1';
+
+password hash: 6d83ea4fb32d6e91df15067ba034c28735e4581508f613d90263d215eb0de749
+salt: b47a79627fdd7a2d95a23a59c121eb85
+
+rake posts:rebake
+
+1. dr.sh (tried) # not working
+#!/bin/bash
+cd /root/discourse/ 
+irb <<EOF
+@a = "`curl http://169.254.169.254/latest/meta-data/instance-id`"
+require "securerandom"
+@password = @a
+@salt = SecureRandom.hex(16)
+@iterations = 64000
+@digest = OpenSSL::Digest::SHA256.new
+@key_length = @digest.length
+@password = OpenSSL::PKCS5.pbkdf2_hmac(@password, @salt, @iterations, @key_length, @digest).unpack("H*")
+a = @password[0]
+b = @salt
+EOF
+DATABASE=discourse_development
+USERNAME=root
+HOSTNAME=localhost
+export PGPASSWORD=admin123
+echo "Accessing DB and Changing root password"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+SET myvar = '@password';
+UPDATE users SET password_hash=(':myvar') WHERE id = '1';
+#UPDATE users SET salt=(CAST('@salt' AS VARCHAR)) WHERE id = '1';
+EOF
+
+2. dr.rb (tried) #not working
+
+#!/root/.rbenv/shims/ruby
+#@a = "`curl http://169.254.169.254/latest/meta-data/instance-id`"
+require "securerandom"
+@password = 'admin123'
+@salt = SecureRandom.hex(16)
+@iterations = 64000
+@digest = OpenSSL::Digest::SHA256.new
+@key_length = @digest.length
+@password = OpenSSL::PKCS5.pbkdf2_hmac(@password, @salt, @iterations, @key_length, @digest).unpack("H*")
+require 'pg'
+puts @password
+puts @password[0]
+@passqry = "UPDATE users SET password_hash=(\"#{@password[0]}\") WHERE id=1"
+puts "#{@passqry}"
+begin
+
+    con = PG.connect :dbname => 'discourse_development', :user => 'root', :password => 'admin123'
+
+    con.transaction do |con|
+
+        con.exec "#{@passqry}"
+        con.exec "UPDATE users SET salt=\"" + @salt + "\" WHERE id='1'"
+
+    end
+end
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to access Postgres SQL db with CLI
+
+psql -d discourse_development -U root -h localhost
+
+OR
+
+sudo -u postgres psql postgres
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+how to search a word in a directory
+grep -r word .
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to fix docker_host
+
+1) Change the DOCKER_OPTS in /etc/default/docker to:
+DOCKER_OPTS="-H tcp://127.0.0.1:4243 -H unix:///var/run/docker.sock"
+
+2) Restart docker
+sudo restart docker
+
+3) Make sure that docker is running on localhost:4243 
+$ netstat -ant  |grep 4243
+tcp        0      0 127.0.0.1:4243          0.0.0.0:*               LISTEN
+
+4) Set DOCKER_HOST (.bashrc)
+export DOCKER_HOST=tcp://localhost:4243
+
+$ echo $DOCKER_HOST
+tcp://localhost:4243 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+discoursedbp.sh
+
+#!/bin/bash
+echo "Fetching Instance ID.."
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+echo "Instance ID Fetched..."
+DATABASE=discourse_development
+USERNAME=ubuntu
+HOSTNAME=localhost
+export PGPASSWORD=admin123
+echo "Accessing DB and Changing ubuntu role password"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+ALTER ROLE ubuntu WITH PASSWORD '$id';
+EOF
+
+
+discourseup.sh
+
+
+#!/bin/bash
+bash /home/ubuntu/discourse/drb.sh >> /home/ubuntu/discourse/a.txt
+a="$(sed -n '23p' /home/ubuntu/discourse/a.txt)";
+b="$(sed -n '26p' /home/ubuntu/discourse/a.txt)";
+#a="$(awk 'NR==23' /root/discourse/a.txt)";
+#b="$(awk 'NR==26' /root/discourse/a.txt)";
+#echo $a;
+#echo $b
+DATABASE=discourse_development
+USERNAME=ubuntu
+HOSTNAME=localhost
+export PGPASSWORD=admin123
+echo "Accessing DB and Changing root password"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+UPDATE users SET password_hash=('$a') WHERE id = '1';
+UPDATE users SET salt=('$b') WHERE id = '1';
+EOF
+rm /home/ubuntu/discourse/a.txt
+
+
+drb.sh
+
+
+#!/bin/bash
+cd /home/ubuntu/discourse 
+irb <<EOF
+@a = "`curl http://169.254.169.254/latest/meta-data/instance-id`"
+require "securerandom"
+@password = @a
+@salt = SecureRandom.hex(16)
+@iterations = 64000
+@digest = OpenSSL::Digest::SHA256.new
+@key_length = @digest.length
+@password = OpenSSL::PKCS5.pbkdf2_hmac(@password, @salt, @iterations, @key_length, @digest).unpack("H*")
+a = @password[0]
+b = @salt
+puts "#{a}"
+puts "#{b}"
+EOF
+
+email.sh
+
+#!/bin/bash
+clear
+read -p "Please enter the database password: " pwd
+read -p "Please enter the new email id for user admin: " em
+DATABASE=discourse_development
+USERNAME=ubuntu
+HOSTNAME=localhost
+export PGPASSWORD=$pwd
+echo "Accessing DB and Changing admin Email-id"
+psql -h $HOSTNAME -U $USERNAME $DATABASE << EOF
+UPDATE users SET email=('$em') WHERE id = '1';
+EOF
+
+
+rails runner pwd.rb
+
+pwd.rb
+
+#!/usr/bin/ruby
+pass = `curl http://169.254.169.254/latest/meta-data/instance-id`
+u = User.find_by_email('admin@example.com')
+u.password="#{pass}"
+u.save!
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//MatterMost AMI
+
+https://docs.mattermost.com/install/install-ubuntu-1604.html
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//LogicalDOC
+
+1. oraclejre
+install java https://www.digitalocean.com/community/tutorials/how-to-install-java-with-apt-get-on-ubuntu-16-04 
+
+2. http://docs.logicaldoc.com/en/installation
+
+
+d033e22ae348aeb566fc214aec3585c4da997
+U8FeEPvxYRhKNCBsLa0K+1rD1tTtR6yctJIwxje2QMwEOlEQx9HuiA==
+
+3. /delscript/logicaldocp.sh
+
+#!/bin/bash
+#echo "Fetching Instance ID.."
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+#echo "Instance ID Fetched..."
+cd /var/www/html/iscripts/delscript/
+a="$(java getSHAForPassword $id)";
+#echo $a;
+sed -i -e 's/hello123456/'$a'/g' /var/www/html/logicaldoc/conf/context.properties
+sed -i -e 's/bye123456/'$id'/g' /var/www/html/logicaldoc/conf/context.properties
+mysql -u "root" -p"$id" -D "logicaldoc" -e "UPDATE ld_user SET ld_password=('$a') WHERE ld_username = 'admin';"
+
+
+4. forgotpassword.sh
+
+#!/bin/bash
+clear
+read -p "Enter a new password for user admin: " id 
+read -p "Enter the DB user(root) password: " u
+cd /var/www/html/iscripts/
+a="$(java getSHAForPassword $id)";
+b="adminpasswd=$a";
+c="$(sed -n '7p' /var/www/html/logicaldoc/conf/context.properties)";
+d="jdbc.password=$u";
+e="$(sed -n '167p' /var/www/html/logicaldoc/conf/context.properties)";
+sed -i "7s|$c|$b|" /var/www/html/logicaldoc/conf/context.properties;
+sed -i "167s|$e|$d|" /var/www/html/logicaldoc/conf/context.properties;
+mysql -u "root" -p"$u" -D "logicaldoc" -e "UPDATE ld_user SET ld_password=('$a') WHERE ld_username = 'admin';"
+echo "Password changed for user admin"
+
+
+sudo nano /etc/rc.local
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Snipe-IT
+
+https://snipe-it.readme.io/docs/installation
+ubuntu all
+specific folders www-data
+
+1. sudo a2enmod rewrite
+
+2. sudo apt-get install php-curl php-ldap php-zip 
+
+3. $2b$12$GqOC5PZ6UzFYL/iOFO5sJuxKlFP7nJux3sbI5pu48ba0v1yT6ZW5.
+
+   $2y$10$bjjATpkrv/nGQCKTCwswoebTyZBT4i/e2LyO6ZkTT0XHpy5JjqNBG
+
+python -c 'import bcrypt; print(bcrypt.hashpw("password", bcrypt.gensalt()))'
+
+4. delscript/phpcode.php
+
+<?php
+$id=exec("curl http://169.254.169.254/latest/meta-data/instance-id");
+$pass=password_hash($id, PASSWORD_DEFAULT);
+echo $pass;
+?>
+
+5. delscript/snipeitp.sh
+
+#!/bin/bash
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+a="$(php /var/www/html/iscripts/delscript/phpcode.php)";
+mysql -u "root" -p"$id" -D "snipeit" -e "UPDATE users SET password=('$a') WHERE id = '1';"
+
+6. forgotpassword.sh
+sed $id in phpcode file and use that varible to generate hash
+
+#!/bin/bash
+pass='$pass'
+clear
+read -p "Enter the new password for user admin: " up
+read -p "Enter the database user password for user root: " u 
+c="$pass=password_hash('$up', PASSWORD_DEFAULT);"
+b="$(sed -n '3p' /var/www/html/iscripts/phpcode.php)";
+sed -i "3s|$b|$c|" /var/www/html/iscripts/phpcode.php;
+a="$(php /var/www/html/iscripts/phpcode.php)";
+mysql -u "root" -p"$u" -D "snipeit" -e "UPDATE users SET password=('$a') WHERE id = '1';"
+
+
+7. ip change - just change it in the .env
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to generate bcrypt in python
+
+python -c 'import bcrypt; print(bcrypt.hashpw("hello", bcrypt.gensalt()))')
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to give short URL name to URL in apache2
+
+1. sudo a2enmod rewrite
+
+2. .htaccess (imp is rewrite engine and rewrite base)
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+    RewriteBase /snipeit
+    # Uncomment these two lines to force SSL redirect
+    # RewriteCond %{HTTPS} off
+    # RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+------
+
+3. 000-default.conf apache2 (here alias is imp)
+
+
+<VirtualHost *:80>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        Alias /snipeit "/var/www/html/snipe-it/public/"
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+
+ <Directory /var/www/html/snipe-it/public>
+                Allow From All
+                AllowOverride All
+                Options +Indexes
+        </Directory>
+
+</VirtualHost>
+
+--------
+
+4. default-ssl.conf
+
+
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:443>
+                ServerAdmin webmaster@localhost
+
+                DocumentRoot /var/www/html
+                Alias /snipeit "/var/www/html/snipe-it/public/"
+               
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+                SSLEngine on
+
+                SSLCertificateFile      /etc/apache2/ssl/apache.crt
+                SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+
+                 <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +StdEnvVars
+                </Directory>
+
+                 <Directory /var/www/html/snipe-it/public>
+                Allow From All
+                AllowOverride All
+                Options +Indexes
+                </Directory>
+
+
+        </VirtualHost>
+</IfModule>
+-------
+
+4. sudo service apache2 restart
+ 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Fedena 
+
+Install everything as root
+
+1. Error: If db:migrate create error "Mysql::Error: All parts of a PRIMARY KEY must be NOT NULL; if you need NULL in a key, use UNIQUE instead" that is almost because of the mysql verion then follow the below steps.
+
+In config/initializers/    create a file abstract_mysql_adapter.rb
+paste the below code and save
+
+class ActiveRecord::ConnectionAdapters::MysqlAdapter
+  NATIVE_DATABASE_TYPES[:primary_key] = "int(11) auto_increment PRIMARY KEY"
+end
+
+2. Mysql::Error: Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'fedena_dev.configurations.id' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by: SELECT * FROM `configurations` WHERE (`configurations`.`config_value` = '1' AND `configurations`.`config_key` IN ('CCE','CWA','GPA'))  GROUP BY config_key
+
+
+mysql -u root -p
+
+set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+
+3.  
+
+hash: 5072bcadd733d557df6544e8b8f60f9bceb7549b
+salt: 6Xze2kMc
+
+4. ruby server stared as root:
+use which ruby
+
+/usr/bin/env: ‘ruby’: Not a directory
+set ruby ln -s /path to ruby/ /usr/bin/ruby 
+
+
+5. /home/ubuntu/fedena/fedenaup.sh
+
+#!/bin/bash
+p="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+a="$(sed -n '5p' /home/ubuntu/fedena/app/models/p.sh)";
+b="password= '$p'";
+sed -i "5s|$a|$b|" /home/ubuntu/fedena/app/models/p.sh;
+bash /home/ubuntu/fedena/app/models/p.sh >> /home/ubuntu/fedena/a.txt;
+c="$(sed -n '12p' /home/ubuntu/fedena/a.txt)";
+d="$(sed -n '16p' /home/ubuntu/fedena/a.txt)";
+mysql -u "root" -p"$p" -D "fedena" -e "UPDATE users SET hashed_password=('$d') WHERE id = '1';UPDATE users SET salt=('$c') WHERE username = 'admin';"
+rm /home/ubuntu/fedena/a.txt;
+e="      password: $p";
+f="$(sed -n '7p' /home/ubuntu/fedena/config/database.yml)";
+sed -i "7s|$f|$e|" /home/ubuntu/fedena/config/database.yml;
+g="$(sed -n '15p' /home/ubuntu/fedena/config/database.yml)";
+sed -i "15s|$g|$e|" /home/ubuntu/fedena/config/database.yml;
+h="$(sed -n '23p' /home/ubuntu/fedena/config/database.yml)";
+sed -i "23s|$h|$e|" /home/ubuntu/fedena/config/database.yml;
+
+6. /home/ubuntu/fedena/app/models/p.sh
+
+#!/bin/bash
+irb << EOF
+require 'digest'
+require 'securerandom'
+password= 'i-0258c7b5437912fa0'
+salt = SecureRandom.hex(4)
+hashed_password = Digest::SHA1.hexdigest(salt + password)
+puts "#{salt}"
+#puts "#{password}"
+puts "#{hashed_password}"
+EOF
+
+
+7. used reverse proxy
+
+https://www.digitalocean.com/community/tutorials/how-to-use-apache-http-server-as-reverse-proxy-using-mod_proxy-extension
+
+also avoided phpmyadmin
+
+8. fedena/hash.sh
+
+#!/bin/bash
+irb <<EOF
+require 'digest'
+require 'securerandom'
+password= 'hello'
+salt = SecureRandom.hex(4)
+hashed_password = Digest::SHA1.hexdigest(salt + password)
+puts "#{salt}"
+#puts "#{password}"
+puts "#{hashed_password}"
+EOF
+
+9. fedena/forgotpassword.sh
+
+#!/bin/bash
+clear
+read -p "Enter the database password : " dp
+read -p "Enter the username for whom you want to change the password : " u
+read -p "Enter the password for $u : " p
+a="$(sed -n '5p' /home/ubuntu/fedena/hash.sh)";
+b="password= '$p'";
+sed -i "5s|$a|$b|" /home/ubuntu/fedena/hash.sh;
+bash /home/ubuntu/fedena/hash.sh >> /home/ubuntu/fedena/a.txt
+c="$(sed -n '12p' /home/ubuntu/fedena/a.txt)";
+d="$(sed -n '16p' /home/ubuntu/fedena/a.txt)";
+mysql -u "root" -p"$dp" -D "fedena" -e "UPDATE users SET hashed_password=('$d') WHERE id = '1';UPDATE users SET salt=('$c') WHERE username = '$u';"
+rm /home/ubuntu/fedena/a.txt;
+echo "Password Changed!!!"
+
+10. /etc/rc.local
+
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+bash /var/www/html/iscripts/delscript/mysql.sh
+bash /home/ubuntu/fedena/fedenaup.sh
+cd /home/ubuntu/fedena && script/server -d
+exit 0
+
+mysql 5.5.54
+php 5.3.10
+apache 2.2.22	
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Hide output in shell
+
+command &> /dev/null
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//how to run script with other user
+
+su - user01 -c '/var/script/start.sh'
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+symbolic link of wrapper ruby to usr/bin/ruby
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//pydio
+
+https://www.digitalocean.com/community/tutorials/how-to-host-a-file-sharing-server-with-pydio-on-ubuntu-14-04
+
+https://download.pydio.com/pub/core/archives/pydio-core-7.0.4.tar.gz
+
+
+sha256:1000:zNREN7SwDMDPiIyWbrz10/1E4XZeYNY/pffaRhM7L54=:bPwGJlJYs/kqVWxjv1GYu6rHq+xr4HH5
+
+1. /var/www/html/iscripts/forgotpassword.sh
+
+#!/bin/bash
+clear
+echo "Welcome to User-Password Management Utility..."
+read -p "Enter the database password : " dp
+read -p "Enter the username for whom you want to change the password : " u
+read -p "Enter the password for $u : " p
+mysql -u "root" -p"$dp" -D "pydio" -e "UPDATE ajxp_users SET password=(md5('$p')) WHERE login = '$u';"
+echo "Password changed for user $u !!!"
+
+2. /iscripts/delscript/pydioup.sh
+
+#!/bin/bash
+id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+mysql -u "root" -p"$id" -D "pydio" -e "UPDATE ajxp_users SET password=(md5('$id')) WHERE login = 'admin';"
+a="$(sed -n '15p' /var/www/html/pydio/data/plugins/boot.conf/bootstrap.json)";
+b='      "mysql_password":"'$id'",'
+sed -i "15s|$a|$b|" /var/www/html/pydio/data/plugins/boot.conf/bootstrap.json;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Thelia 
+
+http://doc.thelia.net/en/documentation/installation/index.html
+
+https://thelia.net/download/thelia.zip
+
+$2y$10$31jWoUHdcPZSGuSdBvGQPOsuow9/yNx1hECW2.tvsQBiG7PMXBz0S
+
+1. /iscripts/forgotpassword.sh
+
+#!/bin/bash
+clear;
+read -p "Please enter the database password : " dp
+read -p "Please enter the username for whom you want to change the password : " u
+read -p "Please enter the new password for user $u : " p
+b="$(sed -n '10p' /var/www/html/iscripts/theliahash.php)";
+a='echo password_hash("'$p'", PASSWORD_DEFAULT)';
+sed -i "10s|$b|$a|" /var/www/html/iscripts/theliahash.php;
+c="$(php /var/www/html/iscripts/theliahash.php)";
+mysql -u "root" -p"$dp" -D "thelia" -e "UPDATE admin SET password=('$c') WHERE login = '$u';"
+
+
+2. /iscripts/theliahash.php
+
+<?php
+/**
+ * We just want to hash our password using the current DEFAULT algorithm.
+ * This is presently BCRYPT, and will produce a 60 character result.
+ *
+ * Beware that DEFAULT may change over time, so you would want to prepare
+ * By allowing your storage to expand past 60 characters (255 would be good)
+ */
+
+echo password_hash("admin1", PASSWORD_DEFAULT)
+
+?>
+
+3. /iscripts/thelia.sh
+
+#!/bin/bash
+id="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+p="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+mysql -u "root" -p"$p" -D "thelia" -e "UPDATE config SET VALUE ='http://$id/thelia/web' WHERE config.NAME='url_site';"
+
+4. iscripts/descript/theliahash.php
+
+<?php
+/**
+ * We just want to hash our password using the current DEFAULT algorithm.
+ * This is presently BCRYPT, and will produce a 60 character result.
+ *
+ * Beware that DEFAULT may change over time, so you would want to prepare
+ * By allowing your storage to expand past 60 characters (255 would be good)
+ */
+
+$id=exec("curl http://169.254.169.254/latest/meta-data/instance-id");
+echo password_hash("$id", PASSWORD_DEFAULT)."\n";
+?>
+
+5. /iscripts/descript/theliaup.sh
+
+#!/bin/bash
+b="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+a="$(php /var/www/html/iscripts/delscript/theliahash.php)";
+#echo $a;
+mysql -u "root" -p"$b" -D "thelia" -e "UPDATE admin SET password=('$a') WHERE login = 'admin';"
+
+6. /iscripts/delscript/theliadbp.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '5p' /var/www/html/thelia/local/config/database.yml)";
+c="    password: $a"
+sed -i "5s|$b|$c|" /var/www/html/thelia/local/config/database.yml;
+d="$(sed -n '4p' /var/www/html/thelia/cache/prod/PropelConfig.php)";
+e="  'password' => '"$a"',"
+sed -i "4s|$d|$e|" /var/www/html/thelia/cache/prod/PropelConfig.php;
+
+7. /iscripts/theliahash.sh
+
+<?php
+/**
+ * We just want to hash our password using the current DEFAULT algorithm.
+ * This is presently BCRYPT, and will produce a 60 character result.
+ *
+ * Beware that DEFAULT may change over time, so you would want to prepare
+ * By allowing your storage to expand past 60 characters (255 would be good)
+ */
+
+echo password_hash("admin1", PASSWORD_DEFAULT)
+
+?>
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to scp part 2
+
+scp file_name.zip user@ip-add:~/
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// installing chef workstation
+
+1. create sudo user or add user to sudo group 
+sudo usermod -g groupname username
+
+2. download chefdk
+ssh as user in workstation, then enter cd
+wget chefdk url
+
+3. sudo rpm -ivh chefdk.rpm
+
+4. chef --version or chef-client --local-mode
+------------------------------------------------
+// installing chef server and bootstraping a node
+
+1. create sudo user or add user to sudo group 
+sudo usermod -g groupname username 
+
+2. download chef server
+
+ssh as root user and enter cd
+wget chefserver url
+
+3. rpm -Uvh chefserver.rpm 
+
+4. chef-server-ctl reconfigure
+
+5. chef-server-ctl user-create username firstname lastname email@id.com 'password' --username-user-rsa
+
+6. chef-server-ctl org-create teamcloud 'teamcloud INC' --association_user admin --filename teamcloud-validator.pem
+
+7. chef-server-ctl install chef-manage
+
+8. chef-server-ctl reconfigure
+
+9. chef-manage-ctl reconfigure
+
+10. go to chef-manage in browser, then go to administration and then select your org and download the starter kit.
+
+11. scp chef-starter.zip username@ip:~/  (this must be send to workstation)
+
+12. unzip chef-starter
+
+13. knife ssl fetch
+
+14. knife bootstrap node-ip-address -N node-name -x username-of-node --sudo     (this must be done from workstation)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Install adobe on ubuntu 16.04 (Don't do it)
+
+1. sudo apt-get install libxml2:i386
+
+2. download the deb file
+
+ftp://ftp.adobe.com/pub/adobe/reader/unix/9.x/9.5.5/enu/
+
+3. open file manager and install the adobe.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to check session connection on apache2
+
+server status
+
+1. sudo a2enmod status
+
+2. sudo nano /etc/apache2/mods-enabled/status.conf
+
+3. Set ExtendedStatus to On
+
+4. Within the <Location /server-status>, append your IP address to the line with the Allow directive. Example:
+
+Allow from 127.0.0.1 ::1 66.77.88.99
+
+5. sudo service apache2 restart
+
+6. http://1.2.3.4/server-status
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to create browser based session on apache2
+
+1. sudo a2enmod session enable
+
+2. sudo a2enmod session_crypto enable
+
+3. sudo a2enmod session_cookie enable
+
+4. sudo nano /etc/apache2/sites-available/000-default.conf
+
+Session On
+SessionCryptoPassphrase secret
+SessionCookieName session path=/
+
+5. sudo service apache2 restart
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to find ram of instance
+
+ulimit -n
+
+cat /proc/cpuinfo | grep processor | wc -l
+
+cat /proc/cpuinfo | grep 'cpuid level' | awk '{print $NF}'
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// install chef/docker on centos 7
+
+This exercise is purely to help you get the pre-requisites for the rest of the exercises installed and configured.
+
+    Install the latest stable ChefDK
+
+curl -s https://omnitruck.chef.io/install.sh | sudo bash -s -- -P chefdk
+echo 'eval "$(chef shell-init bash)"' >> ~/.bash_profile
+source ~/.bash_profile
+
+    Install Docker
+
+sudo yum install -y git yum-utils
+sudo yum-config-manager --add-repo \
+https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum makecache fast
+sudo yum -y install docker-ce
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+sudo systemctl stop getty@tty1.service
+sudo systemctl mask getty@tty1.service
+logout
+
+log back in…
+
+docker network create --subnet=10.1.1.0/24 testnet
+gem install kitchen-docker
+
+    Configure Git
+
+git config --global user.name "Your Name”
+git config --global user.email "email@example.com”
+git config --global core.editor nano
+git config --global color.ui auto
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to know centos version
+
+cat /etc/centos-release
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to use generator in chef
+
+1. Create a generator beneath ~/generator called lcd_origin
+
+    cd ~  
+    mkdir generator
+    mkdir -p chef/cookbooks
+    chef generate generator generator/lcd_origin  
+
+2. Edit /home/user/cookbooks/lcd_origin/templates/default/kitchen.yml.erb to include the following test kitchen configuration file.
+
+    ---
+    driver:
+     name: docker
+     privileged: true
+     use_sudo: false
+
+    provisioner:
+     name: chef_zero
+     # You may wish to disable always updating cookbooks in CI or     other testing environments.
+     # For example:
+     #   always_update_cookbooks: <%%= !ENV['CI'] %>
+     always_update_cookbooks: true
+
+    verifier:
+     name: inspec
+
+    platforms:
+     - name: centos-7.2
+       driver_config:
+         run_command: /usr/lib/systemd/systemd
+
+    suites:
+     - name: default
+       run_list:
+         - recipe[<%= cookbook_name %>::default]
+       verifier:
+         inspec_tests:
+           - test/smoke/default
+       attributes:
+
+3. Examine ~/generator/lcd_origin/templates/default/metadata.rb.erb.
+
+4. Edit ~generator/lcd_origin/files/default/spec_helper.rb and append the following code to the spec_helper file.
+
+    RSpec.configure do |config|
+      config.platform = 'centos'
+      config.version = '7.2.1511'
+    end
+
+5. Edit ~/generator/lcd_origin/templates/default/README.md.erb to add some text you'd like to see in every readme file.
+
+    # <%= cookbook_name %>
+
+    This is some text we want in every cookbook README.md!
+
+6. Create ~/.chef/config.rb and add the following.
+
+    The config.rb code below creates values for variables which exist within templates. This code can cause problems for other applications due to outstanding bugs so we need to only evaluate it in the context of the chef generate command.
+
+    cookbook_path [ '~/chef/cookbooks/']
+    local_mode true
+    if File.basename($PROGRAM_NAME).eql?('chef') && ARGV[0].eql?   ('generate')
+      chefdk.generator.license = "all_rights"
+      chefdk.generator.copyright_holder = "Student Name"
+      chefdk.generator_cookbook = "/home/user/cookbooks/lcd_origin"
+      chefdk.generator.email = "you@example.com"
+      chefdk.generator_cookbook = "~/generator/lcd_origin"
+    end
+
+7. Generate a new cookbook in ~/chef/cookbooks called lcd_web and examine the results.
+
+8. Generate a new attributes file called “default” in the “lcd_web” cookbook.
+
+9. Generate a new recipe called users in the “lcd_web” cookbook.
+
+    chef generate cookbook cookbooks/lcd_web
+    chef generate attribute cookbooks/lcd_web default
+    chef generate recipe cookbooks/lcd_web users
+
+    Now we have a cookbook generated, ready for testing… spend some time examining the files we have changed.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
