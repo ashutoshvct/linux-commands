@@ -3446,6 +3446,352 @@ cat /etc/centos-release
 
     Now we have a cookbook generated, ready for testing… spend some time examining the files we have changed.
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to write test in chefspec
+
+In this exercise you will write some ChefSpec tests for the lcd_web cookbook.
+
+ Create ChefSpec tests to ensure:
+
+    httpd is installed, enabled and running.
+    A group called developers exists and a user called webadmin exists that has group membership of developers.
+
+Solution
+
+1. The contents of spec/unit/recipes/default_spec.rb appear as follows:
+    httpd is installed, enabled and running…
+
+require 'spec_helper'
+
+describe 'lcd_web::default' do
+  context 'CentOS' do
+    let(:chef_run) do
+      runner = ChefSpec::ServerRunner.new(platform: 'centos', version: '7.2.1511')
+      runner.converge(described_recipe)
+    end
+
+    it 'converges successfully' do
+      expect { chef_run }.to_not raise_error
+    end    
+
+    it 'installs httpd' do
+      expect(chef_run).to install_package('httpd')
+    end
+   it 'installs net-tools' do
+      expect(chef_run).to install_package('net-tools')
+    end
+
+    it 'enables the httpd service' do
+      expect(chef_run).to enable_service('httpd')
+    end
+
+    it 'starts the httpd service' do
+      expect(chef_run).to start_service('httpd')
+    end
+
+  end
+end
+
+2. The contents of spec/unit/recipes/users_spec.rb appear as follows:
+    A group called developers exists and a user called webadmin exists that has group membership of developers.
+
+require 'spec_helper'
+
+describe 'lcd_::default' do
+  context 'CentOS' do
+    let(:chef_run) do
+      runner = ChefSpec::ServerRunner.new(platform: 'centos', version: '7.2.1511')
+      runner.converge(described_recipe)
+    end
+
+    it 'creates the group' do
+      expect(chef_run).to create_group('developers')
+    end
+
+    it 'creates the user' do
+      expect(chef_run).to create_user('webadmin').with(group: 'developers')
+      its
+    end
+
+3. Run the tests from the lcd_web cookbook:
+
+chef exec rspec
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to create and run InSpec tests within test kitchen
+
+In this exercise you will create and run InSpec tests within test kitchen.
+Create InSpec Integration Tests
+
+    Test that the httpd package is installed and the service is enabled and running.
+    Test that the net-tools package is installed and the service is enabled and running.
+    Test that a group called developers exists and a user called webadmin exists that has group membership of developers.
+
+Create Chef Code to satisfy the tests
+
+    Run and fail InSpec tests.
+    Write the Chef code to install httpd and net-tools in the default recipe.
+    Write the Chef code to ensure a group called developers exists in the users recipe.
+    Write the Chef code ensure a user called webadmin exists and is a member of the developers group in the users recipe.
+    Run and pass InSpec tests.
+
+Solution
+
+1. The ~chef/cookbooks/lcd_web/test/smoke/default/default_test.rb should look like this:
+
+['net-tools', 'httpd'].each do |pkg|
+  describe package(pkg) do
+    it { should be_installed }
+  end
+end
+
+3. The ~chef/cookbooks/lcd_web/test/smoke/default/spec_users.rb should contain the following:
+
+describe user('webadmin') do
+    it { should exist }
+    its('group') { should eq 'developers' }
+end 
+
+describe group('developers') do
+    it { should exist }
+end 
+-------------
+Create Chef Code to satisfy the tests
+
+    Write the Chef code to install httpd and net-tools in the default recipe.
+    Write the Chef code to ensure a group called developers exists in the users recipe.
+    Write the Chef code ensure a user called webadmin exists and is a member of the developers group in the users recipe.
+
+Install Packages
+
+1. The ~chef/cookbooks/lcd_web/recipes/default.rb can look like this:
+
+include_recipe 'lcd_web::users'
+
+package 'httpd' do
+  action :install
+end
+
+service 'httpd' do
+  action [:enable, :start]
+end
+----------
+Create Group and User
+
+1. The ~chef/cookbooks/lcd_web/recipes/users.rb can look like this:
+
+
+group 'developers'
+
+user 'webadmin' do
+  action :create 
+  uid '1020'
+  gid 'developers'
+  home '/home/webadmin'
+  shell '/bin/bash'
+end
+
+    Run kitchen converge to ensure your changes are converged on your test instance.
+    Run kitchen verify to ensure the tests are passing.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to know number of cores or processor in ubuntu 16.04
+
+cat /proc/cpuinfo | grep processor | wc -l
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to change default route in ubuntu from eth0/any to eth1 
+
+sudo ip route change default via 192.168.100.2 dev eth1 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Create AWS iam user with AWS Console login 
+s
+aws iam create-login-profile --user-name MyUser --password My!User1Login8P@ssword
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to view number of connections in nginx
+
+location /basic_status {
+    stub_status;
+}
+
+http://your-ip/basic_status
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// NodeBB
+
+https://nodebb.readthedocs.io/en/latest/installing/os/ubuntu.html
+https://github.com/NodeBB/NodeBB
+mongodb 
+admin admin@123
+root root@123
+ Username: admin
+    Password: ca7c5b43
+
+//password
+https://community.nodebb.org/topic/9542/get-password-via-mongodb/5
+secret: 2a679963-bfd2-47bd-9d0a-db8a12ce325d
+db.objects.find({_key:"user:1"}, {password: true, _id: false})
+
+mongo --port 27017 -u "admin" -p "admin" --authenticationDatabase "admin"
+
+$2a$12$jno5mCYIjbkKYQeiritI2e5dW.XQ2h3k39.2dhA7zBCiaKVQyfBEG
+$2a$12$nWESXni/RTzGantbGUOEEuTMT1DpZgEIdQwXgU.vNjtVLm1klg3MO
+
+1. /nodebb/src/1.js
+
+var bcrypt = require('bcryptjs');
+var password='admin@123';
+console.log(password);
+bcrypt.genSalt(12, function(err, salt) {
+console.log(salt);
+bcrypt.hash(password, salt, function(err, hash) {
+    console.log(hash);
+ });
+});
+
+1. /iscripts/ip.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+b="$(sed -n '2p' /var/www/html/nodebb/config.json)";
+c='    "url": "http://'"$a"':4567",';
+sed -i "2s|$b|$c|" /var/www/html/nodebb/config.json;
+echo "Restarting NodeBB Service ... .."
+service nodebb restart
+echo "Done!!!"
+
+2. /iscripts/delscript/nodebb.sh
+
+#!/bin/bash
+bash /var/www/html/iscripts/delscript/nodebbp.sh
+a="$(node /var/www/html/nodebb/src/1.js;)"
+b="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+sudo mongo "localhost:27017/nodebb" -u "root" -p "root@123" --eval 'db.objects.updateOne({ "username" : "admin" },{ $set: { "password" : "'$a'" } });';
+sudo mongo --port 27017 -u "admin" -p "admin@123" --authenticationDatabase "admin" << EOF
+use nodebb
+db.changeUserPassword("root", "'$b'");
+EOF
+sudo mongo --port 27017 -u "admin" -p "admin@123" --authenticationDatabase "admin" << EOF
+use admin
+db.changeUserPassword("admin", "'$b'");
+EOF
+
+3. /iscripts/delscript/nodebbp.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n 2p /var/www/html/nodebb/src/1.js)";
+c="var password='"$a"';";
+sed -i "2s|$b|$c|" /var/www/html/nodebb/src/1.js
+
+4. /nodebb/efile.sh 
+
+#!/bin/bash
+find . -type f -name sed\* -exec rm -f {} \;
+
+5. 
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to Disable Transparent Huge Pages (THP)
+
+https://docs.mongodb.com/manual/tutorial/transparent-huge-pages/
+
+1. Create the init.d script.
+
+Create the following file at /etc/init.d/disable-transparent-hugepages:
+
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          disable-transparent-hugepages
+# Required-Start:    $local_fs
+# Required-Stop:
+# X-Start-Before:    mongod mongodb-mms-automation-agent
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Disable Linux transparent huge pages
+# Description:       Disable Linux transparent huge pages, to improve
+#                    database performance.
+### END INIT INFO
+
+case $1 in
+  start)
+    if [ -d /sys/kernel/mm/transparent_hugepage ]; then
+      thp_path=/sys/kernel/mm/transparent_hugepage
+    elif [ -d /sys/kernel/mm/redhat_transparent_hugepage ]; then
+      thp_path=/sys/kernel/mm/redhat_transparent_hugepage
+    else
+      return 0
+    fi
+
+    echo 'never' > ${thp_path}/enabled
+    echo 'never' > ${thp_path}/defrag
+
+    re='^[0-1]+$'
+    if [[ $(cat ${thp_path}/khugepaged/defrag) =~ $re ]]
+    then
+      # RHEL 7
+      echo 0  > ${thp_path}/khugepaged/defrag
+    else
+      # RHEL 6
+      echo 'no' > ${thp_path}/khugepaged/defrag
+    fi
+
+    unset re
+    unset thp_path
+    ;;
+esac
+-----
+2. sudo chmod 755 /etc/init.d/disable-transparent-hugepages
+
+3. sudo update-rc.d disable-transparent-hugepages defaults
+
+4. sudo service disable-transparent-hugepages start
+
+5. cat /sys/kernel/mm/transparent_hugepage/enabled
+cat /sys/kernel/mm/transparent_hugepage/defrag
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Install Nginx from source in ubuntu 16
+
+1. sudo apt-get update
+
+2.  sudo apt-get install build-essential
+
+3. wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.40.tar.gz
+
+4. tar -zxf pcre-8.40.tar.gz
+
+5. cd pcre-8.40
+
+6. ./configure
+
+7. make
+
+8. sudo make install
+
+9. same for wget http://zlib.net/zlib-1.2.11.tar.gz and wget http://zlib.net/zlib-1.2.11.tar.gz
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// install cookbook in chef
+
+    cd ~/cookbook
+    git init
+    echo "New repo!" > readme.txt
+    git add readme.txt
+    git commit -a -m "initializing repo for chef"
+    cd /home/your-username/chef-repo
+    knife cookbook site install weblogic
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// set environment editor
+
+export EDITOR=$(which nano)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
