@@ -3781,8 +3781,28 @@ cat /sys/kernel/mm/transparent_hugepage/defrag
 // set environment editor
 
 export EDITOR=$(which nano)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Docker commands
 
+1. delete all containers
 
+docker rm `docker ps -a -q`
+
+2. -v to mount
+
+3. -p to map port 8080(your port):80(docker port)
+
+4. -P random port
+
+5. docker ps (to know all the running container)
+
+6. docker inspect id/name
+
+7. docker --name=dockernameyouwantto give
+
+8. docker -d to run it in detached mode
+
+9. docker exec -it dockername/id /bin/bash
 
 
 
