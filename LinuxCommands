@@ -1,4 +1,4 @@
-//AWS CLI Commands VIP
+//AWS-linux/ubuntu CLI Commands VIP
 ------------------------------------------------------------------------------------------------------------------------------------------------
 //For checking internet speed on linux
 wget -O speedtest-cli speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
