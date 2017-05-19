@@ -555,6 +555,9 @@ aws ec2 describe-instances --no-verify-ssl --profile region1
 Transfer files within server #import database
 mysql -u username -p database_name < file.sql
 
+export database
+mysqldump -u username -p database_name > file.sql
+
 To change password of current user
 SET PASSWORD FOR 'username'@'localhost' = PASSWORD('mypass');
 
