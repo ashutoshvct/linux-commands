@@ -1,0 +1,39 @@
+Linux Cloud Engineer
+
+- Boot process of Linux
+- How to install package (Red hat, Debian, Ubuntu)
+- Difference between soft link and hard link
+- SSH not working in general for linux. how will you troubleshoot.
+- Permissions - chown, chgrp, chmod
+- sticky bit
+- sgid
+- suid
+- Linux File Structure
+- what is Shell - UI
+- Primary, Extended, Logical Partition
+- Different run levels
+- single user mode and its use
+- file of runlevels - /etc/init
+- What is GRUB
+- /etc/resolve.conf --> where DNS server names are stored
+- How to mount file system
+- chkconfig command -> to make changes persistent
+- How to check CPU and memory
+- ifconfig
+- ip addr show
+- TOP 100 Linux commands
+- How to mount a file system
+- lsblk -> command to check which is not mounted
+- How to do permanent mount?
+- What is \etc\fstab
+- What is mounting in Linux
+- Difference between ext2, ext3, ext4
+- RAID0, RAID1 difference
+- What are SSD?
+- What are IP tables?
+- How to create an Empty file
+- how to apply ACL on a file -> setfail command
+- LVM - How to create logical Volume
+- What is SEL (secure enhanced linux)
+- How to create user/usergroup?
+- Linux is overloaded, How to troubleshoot
