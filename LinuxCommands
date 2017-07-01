@@ -1,7 +1,7 @@
-//AWS-linux/ubuntu CLI Commands VIP
+//AWS CLI Commands VIP
 ------------------------------------------------------------------------------------------------------------------------------------------------
 //For checking internet speed on linux
-wget -O speedtest-cli speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+wget -O speedtest-cli https://raw.github.com/sivel/speedtest-cli/master/speedtest_cli.py
 chmod +x speedtest-cli
 ./speedtest-cli
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1869,10 +1869,10 @@ sed -i -e 's/hello123456/'$iid'/g' /etc/phpmyadmin/config-db.php
 4. delscript/moodleup.sh
 
 #!/bin/bash
-echo "Featching Instance id"
+echo "Fetching Instance id"
 id="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
 echo Fetching Complete
-mysql -u "root" -p"$id" -D "moodle" -e "UPDATE mdl_user SET password=(md5('$id')) WHERE username = 'admin';"
+	mysql -u "root" -p"$id" -D "moodle" -e "UPDATE mdl_user SET password=(md5('$id')) WHERE username = 'admin';"
 
 5. moodlep.sh
 
@@ -3299,9 +3299,19 @@ server status
 
 Allow from 127.0.0.1 ::1 66.77.88.99
 
+OR
+
+#    SetHandler server-status
+#    Order deny,allow
+#    Deny from all
+#    Allow from 177.177.177.177
+
 5. sudo service apache2 restart
 
 6. http://1.2.3.4/server-status
+
+
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // How to create browser based session on apache2
 
@@ -3806,19 +3816,415 @@ docker rm `docker ps -a -q`
 8. docker -d to run it in detached mode
 
 9. docker exec -it dockername/id /bin/bash
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// sonarqube
+
+1. a373a0e667abb2604c1fd571eb4ad47fe8cc0878 - crypted_password
+
+2. salt - 48bc4b0d93179b5103fd3885ea9119498e9d161b
+
+3. remember token -2e5cfe6c3edec1914f1f9cbcfa2afa9d3e620185
+
+4. delscript/sonarqube.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '15p' /var/www/html/sonarqube/conf/sonar.properties)";
+c="sonar.jdbc.password=$a";
+sed -i "15s|$b|$c|" /var/www/html/sonarqube/conf/sonar.properties;
+
+5. 
 
 
 
 
+mysql -u "root" -p"root" -D "sonarqube" -e "UPDATE lime_users SET password=('') WHERE users_name = 'admin';"
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// q2a #qa #question2answer
+0x9f34dd672567fbcad6e6f69ae418d1efc66db4df	
+id7vjnys6lg2sdk6
+admin123
+
+1. password.sh
+
+#!/bin/bash
+clear
+echo "Welcome to Password management utility for qa..."
+read -p "Enter the database password for db qa : " dbp
+read -p "Enter the username of the user for which you want to change the password : " un 
+read -p "Enter the password for user $un : " up
+if mysql -u "root" -p"$dbp" -D "qa" -e "UPDATE qa_users SET passcheck=UNHEX(SHA1(CONCAT(LEFT(passsalt, 8), '$up', RIGHT(passsalt, 8)))) WHERE handle = '$un';" ; then
+echo "Password changed..Success"
+else
+echo "Password change for user $un failed. Please check the input."
+fi
+
+2. qa.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '39p' /var/www/html/qa/qa-config.php)";
+c="        define('QA_MYSQL_PASSWORD', '$a');"
+sed -i "39s|$b|$c|" /var/www/html/qa/qa-config.php;
+mysql -u "root" -p"$a" -D "qa" -e "UPDATE qa_users SET passcheck=UNHEX(SHA1(CONCAT(LEFT(passsalt, 8), '$a', RIGHT(passsalt, 8)))) WHERE userid = '1';"
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//suitecrm
+$1$cn/dSEmI$8e1qSlIYxJtVTUWwuRc7w1
+admin
+
+1. suitecrm.sh
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n 100p /var/www/html/suitecrm/config.php)";
+c="    'db_password' => '$a',"
+sed -i "100s|$b|$c|" /var/www/html/suitecrm/config.php
+mysql -u "root" -p"$a" -D "suitecrm" -e "UPDATE users SET user_hash=(md5('$a')) WHERE user_name = 'admin';"
+
+2. ip.sh
+
+#!/bin/bash
+d="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+e="$(sed -n 259p /var/www/html/suitecrm/config.php)";
+f="  'host_name' => '$d',"
+sed -i "259s|$e|$f|" /var/www/html/suitecrm/config.php
+g="$(sed -n 361p /var/www/html/suitecrm/config.php)";
+h="  'site_url' => 'http://$d/suitecrm',"
+sed -i "361s|$g|$h|" /var/www/html/suitecrm/config.php
+ 
+3. password.sh
+
+#!/bin/bash
+clear
+echo "Welcome to Password Management utility for SuiteCRM"
+read -p "Enter the database password for db suitecrm : " dbp
+read -p "Enter the username whose password you want to change : " un
+read -p "Enter the pasword for user $un : " up
+if mysql -u "root" -p"$dbp" -D "suitecrm" -e "UPDATE users SET user_hash=(md5('$up')) WHERE user_name = '$un';"; then
+echo "Password changed successfully for user $un" 
+else
+echo "Invalid Details. Please retry."
+fi
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Django-CMS
+
+1. start.sh
+
+#!/bin/bash
+cd /home/ubuntu
+source django-cms-site/bin/activate
+cd /home/ubuntu/myproject
+python manage.py runserver 0.0.0.0:5000
+
+2. ip.sh (find a pattern and delete on a specific line number)
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+sed -i '/ALLOWED_HOSTS/d' /home/ubuntu/myproject/myproject/settings.py
+b="ALLOWED_HOSTS = ['$a','localhost']";
+sed -i "30i $b" /home/ubuntu/myproject/myproject/settings.py
+
+3. /delscript/fetchp.sh
 
 
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+c="usr.set_password('$a')"
+b="$(sed -n '7p' /var/www/html/iscripts/delscript/djangocms.sh)";
+sed -i "7s|$b|$c|" /var/www/html/iscripts/delscript/djangocms.sh;
+sleep 2s;
+sudo bash /var/www/html/iscripts/delscript/djangocms.sh
+sleep 2s;
+e="$(sed -n '104p' /home/ubuntu/myproject/myproject/settings.py)"
+d="        'PASSWORD': '$a',"
+sed -i "104s|$e|$d|" /home/ubuntu/myproject/myproject/settings.py;
+
+4. /delscript/djangocms.sh
+
+#!/bin/bash
+cd /home/ubuntu/myproject
+/home/ubuntu/django-cms-site/bin/python manage.py shell << EOF
+from django.contrib.auth.models import User
+User.objects.filter(is_superuser=True)
+usr = User.objects.get(username='admin')
+usr.set_password('i-05ac123026b99b05e')
+usr.save()
+EOF
+
+5. password.sh
+
+#!/bin/bash
+clear
+echo "Welcome to password management utility for Django-CMS"
+read -p "Enter the username for the Application Django-CMS : " un
+cd /home/ubuntu/myproject
+/home/ubuntu/django-cms-site/bin/python manage.py changepassword $un
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//Ghost 
+
+$2a$10$U.P5Haqa51XxbznWAFZir.S5AeC4YMZ53qp4nDhwFDsOy6al.LBgK
+
+1. delscript/ghost.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '21p' /var/www/html/ghost/config.js)";
+c="                password: '$a',"
+sed -i "21s|$b|$c|" /var/www/html/ghost/config.js;
+d="$(sed -n '2p' /var/www/html/ghost/hash.js)";
+e="var password='$a';"
+sed -i "2s|$d|$e|" /var/www/html/ghost/hash.js;
+f="$(sudo node /var/www/html/ghost/hash.js)"
+mysql -u "root" -p"root" -D "ghost" -e "UPDATE users SET password=('$f') WHERE id = '1';"
+
+2. ip.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+b="        url: 'http://$a',"
+c="$(sed -n '14p' /var/www/html/ghost/config.js)";
+sed -i "14s|$c|$b|" /var/www/html/ghost/config.js;
+
+3. ghost/hash.js
+
+var bcrypt = require('bcryptjs');
+var password='admin@12345';
+//console.log(password);
+bcrypt.genSalt(10, function(err, salt) {
+//console.log(salt);
+bcrypt.hash(password, salt, function(err, hash) {
+    console.log(hash);
+ });
+});
+
+4. password.sh
+
+#!/bin/bash
+clear
+echo "Welcome to password utility management for Ghost!!!!!!!!!!!!1"
+read -p "Please enter the database password for database ghost : " dbp
+read -p "Please enter the email id of the user whose password you want to change : " em
+read -p "Please enter the password for the user email id $em : " up
+a="var password='$up'";
+d="$(sed -n '2p' /var/www/html/ghost/hash.js)";
+sed -i "2s|$d|$a|" /var/www/html/ghost/hash.js;
+f="$(sudo node /var/www/html/ghost/hash.js)"
+if mysql -u "root" -p"$dbp" -D "ghost" -e "UPDATE users SET password=('$f') WHERE email = '$em';"; then
+echo "Password changed successfully..."
+else
+echo "Input error..Please retry!!"
+fi
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//silverstripe
+$2y$10$417cb102a3dcb7a3af0aeOcyVrGrCIHUfksNXvx6nLqJyyoes260e
+admin123
 
 
+1. delscript/silverstripe.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '11p' /var/www/html/silverstripe/mysite/_config.php)";
+c="        'password' => '$a',"
+sed -i "11s|$b|$c|" /var/www/html/silverstripe/mysite/_config.php;
+d="$(sed -n '18p' /var/www/html/silverstripe/mysite/_config.php)";
+e="Security::setDefaultAdmin('admin', '$a');";
+sed -i "18s|$d|$e|" /var/www/html/silverstripe/mysite/_config.php;
+
+2. password.sh 
+
+#!/bin/bash
+clear
+echo "Welcome to password management utility for SilverStripe"
+read -p "Enter the password for user admin : " up
+b="$(sed -n '18p' /var/www/html/silverstripe/mysite/_config.php)";
+c="Security::setDefaultAdmin('admin', '$up');"
+sed -i "18s|$b|$c|" /var/www/html/silverstripe/mysite/_config.php;
+echo "Password changed successfully..."
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//mautic
+admin12345
+$2y$13$xD.Jv4bvLus5SzwiMQbQA.nYJpx9d7o0n2LfVzNioqYlmxA3emjYa
+
+1. delscript/mautic.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '9p' /var/www/html/mautic/app/config/local.php)";
+c="        'db_password' => '$a',"
+sed -i "9s|$b|$c|" /var/www/html/mautic/app/config/local.php;
+d="$(sudo php /var/www/html/iscripts/delscript/hash.php)";
+mysql -u "root" -p"$a" -D "mautic" -e "UPDATE users SET password=('$d') WHERE id = '1';"
+
+2. delscript/hash.php
+
+<?php
+$a=exec("curl http://169.254.169.254/latest/meta-data/instance-id");
+$pass=password_hash($a, PASSWORD_DEFAULT);
+echo $pass;
+?>
+
+3. ip.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+b="$(sed -n '23p' /var/www/html/mautic/app/config/local.php)";
+c="        'site_url' => 'http://$a/mautic',"
+sed -i "23s|$b|$c|" /var/www/html/mautic/app/config/local.php;
+
+4. password.sh
+
+#!/bin/bash
+clear
+echo "Welcome to password management utility for Mautic!!!!!!!!!!!!!!!"
+echo ""
+read -p "Please enter the DB password for database mautic : " dbp
+read -p "Please enter the username for whom you want to change the password : " un
+read -p "Please enter the new password for user $un : " up
+echo ""
+c="$(sed -n '2p' /var/www/html/iscripts/hash.php)";
+a=a;
+b='$a="'$up'";'
+sed -i "2s|$c|$b|" /var/www/html/iscripts/hash.php;
+d="$(sudo php /var/www/html/iscripts/hash.php)";
+if mysql -u "root" -p"$dbp" -D "mautic" -e "UPDATE users SET password=('$d') WHERE username = '$un';"; then
+echo "Password Changed Successfully"
+else
+echo "Invalid credentials..please retry!!"
+fi
+
+5. hash.php
+
+<?php
+$a="d";
+$pass=password_hash($a, PASSWORD_DEFAULT);
+echo $pass;
+?>
+
+6. /etc/rc.local
+
+sudo rm -rf /mautic/app/cache
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Grav
+
+$2y$10$y.kalrH3ZdpY8MFBjIcgX.GiARAcKsKIVXY8.0WSEccn/ggT9U8xa
+
+1. delscript/grav.sh
+
+#!/bin/bash
+b="$(sed -n '11p' /var/www/html/grav-admin/user/accounts/admin.yaml)";
+d="$(sudo php /var/www/html/iscripts/delscript/hash.php)";
+c="hashed_password: $d"
+sed -i "11s|$b|$c|" /var/www/html/grav-admin/user/accounts/admin.yaml;
+
+2. delscript/hash.php 
+
+<?php
+$a=exec("curl http://169.254.169.254/latest/meta-data/instance-id");
+$pass=password_hash($a, PASSWORD_DEFAULT);
+echo $pass;
+?>
+
+3. password.sh
+
+#!/bin/bash
+clear
+echo "Welcome to Password management utility for Grav user admin !!!!"
+echo "Remember your password will not be displayed, while you type it in the next line"
+read -s -p "Please enter the new password for user admin : " up
+echo ""
+c="$(sed -n '2p' /var/www/html/iscripts/hash.php)";
+a=a;
+b='$a="'$up'";'
+sed -i "2s|$c|$b|" /var/www/html/iscripts/hash.php;
+d="$(sudo php /var/www/html/iscripts/hash.php)";
+e="$(sed -n '11p' /var/www/html/grav-admin/user/accounts/admin.yaml)";
+g="hashed_password: $d"
+sed -i "11s|$e|$g|" /var/www/html/grav-admin/user/accounts/admin.yaml;
+echo "Password Successfully Changed!!!!"
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to clean/remove logs in ubuntu 16
+
+truncate -s 0 /var/log/*log
+
+truncate -s 0 /var/log/*.log
+
+truncate -s 0 /var/log/**/*.log
+
+find /var/log -type f -name '*.[0-99].gz' -exec rm {} +
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Install nodejs with nvm
+
+1. check the nvm version (0.33.2)
+
+https://github.com/creationix/nvm/releases
+
+2. curl https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+3. nvm install 6.11.0
+
+4. n=$(which node);n=${n%/bin/node}; chmod -R 755 $n/bin/*; sudo cp -r $n/{bin,lib,share} /usr/local;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to create user in mongodb
+// How to change user password in mongodb
+db.createUser(
+{
+    user: "admin",
+    pwd: "admin123",
+    roles: [ "root" ]
+})
 
 
+db.updateUser(
+   "admin",
+   {
+      pwd: "hello123456"
+   }
+) 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to add new db server in phpmyadmin
 
+1. add this in the config.inc.php 
 
+$cfg['Servers'][2]['host']     = 'THE_HOST';
+$cfg['Servers'][2]['user']     = 'THE_USER';
+$cfg['Servers'][2]['password'] = 'THE_PASSWORD';
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Cassandra
 
+CREATE USER admin WITH PASSWORD 'admin123' SUPERUSER;
+
+cqlsh localhost -u admin -p admin123
+
+ALTER ROLE admin WITH PASSWORD = 'hello12345';
+
+DROP ROLE IF EXISTS cassandra;
+
+1. /home/ubuntu/a.sh
+
+#!/bin/bash
+sudo service cassandra start
+sleep 2s;
+cqlsh localhost -u admin -p hello12345 << EOF
+ALTER ROLE admin WITH PASSWORD = 'admin123';
+EOF
+
+2. /home/ubuntu/b.sh
+
+#!/bin/bash
+a="$(curl http://169.254.169.254/latest/meta-data/instance-id)";
+b="$(sed -n '5p' /home/ubuntu/a.sh)";
+c="ALTER ROLE admin WITH PASSWORD = '$a';"
+sed -i "5s|$b|$c|" /home/ubuntu/a.sh;
+sudo bash /home/ubuntu/a.sh
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
