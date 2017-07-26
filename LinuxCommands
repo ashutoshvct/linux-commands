@@ -1640,7 +1640,7 @@ sudo service tomcat start
 sed -i -e 's/hello123456/'$iid'/g' /var/www/html/tomcat/conf/tomcat-users.xml
 sudo service tomcat restart
 
-2. 000-default (proxy http apache) //how to use reverse proxy in apache
+2. 000-default (proxy http apache) //how to use reverse proxy in apache or apache2 reverse proxy
  
 <VirtualHost *:80>
         
@@ -4169,11 +4169,13 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 3. nvm install 6.11.0
+nvm use 6.11.0
 
 4. n=$(which node);n=${n%/bin/node}; chmod -R 755 $n/bin/*; sudo cp -r $n/{bin,lib,share} /usr/local;
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // How to create user in mongodb
 // How to change user password in mongodb
+// how to create superuser in mongodb
 db.createUser(
 {
     user: "admin",
@@ -4225,6 +4227,121 @@ c="ALTER ROLE admin WITH PASSWORD = '$a';"
 sed -i "5s|$b|$c|" /home/ubuntu/a.sh;
 sudo bash /home/ubuntu/a.sh
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Install Java 8
+
+1. sudo add-apt-repository ppa:webupd8team/java
+press enter
+
+2. sudo apt-get update
+
+3. sudo apt-get install oracle-java8-installer -y 
+select ok and yes.
+
+4. sudo update-alternatives --config java
+
+5. sudo nano /etc/environment
+
+JAVA_HOME="/usr/lib/jvm/java-8-oracle"
+
+6. source /etc/environment
+
+7. echo $JAVA_HOME
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Create userpassword in postgresql
+
+First login into psql account:
+
+    sudo -u user_name psql db_name
+
+To reset the password if you have forgotten:
+
+    ALTER USER "user_name" WITH PASSWORD 'new_password';
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//yarn for every user
+
+export PATH="$HOME/.yarn/bin:$PATH"
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to install Nginx 1.12
+
+sudo nginx=stable # use nginx=development for latest development version
+sudo add-apt-repository ppa:nginx/$nginx
+sudo apt-get update
+sudo apt-get install nginx
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//cron in AWS
+
+0 1 ? * SAT *
+
+every sat 1:00am
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// see ram consumtion of each process
+
+ps aux | grep apache2 | awk '{sum=sum+$6}; END {print sum/1024 " MB"}'
+
+ps aux  | awk '{print $6/1024 " MB\t\t" $11}'  | sort -n
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// SpagoBI
+
+<Environment name="spagobi_service_url" type="java.lang.String" value="http://54.87.152.60:8080/SpagoBI"/>
+<Environment name="spagobi_host_url" type="java.lang.String" value="http://54.87.152.60:8080"/>
+
+1. /home/ubuntu/curl.sh
+
+#!/bin/bash
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+lynx -accept_all_cookies "$ip":8080/SpagoBI
+
+2. /home/ubuntu/ip.sh
+
+#!/bin/bash
+echo "fetching ip"
+ip="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)";
+echo "fetching completed"
+a="$(sed -n '86p' /opt/spagobi/conf/server.xml)"
+b="$(sed -n '87p' /opt/spagobi/conf/server.xml)"
+i='    <Environment name="spagobi_service_url" type="java.lang.String" value="http://'$ip':8080/SpagoBI"/>'
+d='    <Environment name="spagobi_host_url" type="java.lang.String" value="http://'$ip':8080"/>'
+sed -i "86s|$a|$i|" /opt/spagobi/conf/server.xml
+sed -i "87s|$b|$d|" /opt/spagobi/conf/server.xml
+
+3. /etc/rc.local
+
+sudo service mysql restart
+sudo bash /home/ubuntu/ip.sh
+sudo bash /opt/spagobi/bin/startup.sh
+sleep 20s;
+sudo bash /home/ubuntu/curl.sh
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to generate $2a$10 in php?
+
+<?php
+$password = 'hello123';
+// A higher "cost" is more secure but consumes more processing power
+$cost = 10;
+// Create a random salt
+$salt = strtr(base64_encode(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM)), '+', '.');
+// Prefix information about the hash so PHP knows how to verify it later.
+// "$2a$" Means we're using the Blowfish algorithm. The following two digits are the cost parameter.
+$salt = sprintf("$2a$%02d$", $cost) . $salt;
+// Hash the password with the salt
+$hash = crypt($password, $salt);
+echo "$hash \n";
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Connection string for mongo
+
+mongodb://youruser:yourpassword@localhost/yourdatabase
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 
 
