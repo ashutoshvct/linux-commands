@@ -32,7 +32,7 @@
 - What are SSD?
 - What are IP tables?
 - How to create an Empty file
-- how to apply ACL on a file -> setfail command
+- how to apply ACL on a file -> setfacl command
 - LVM - How to create logical Volume
 - What is SEL (secure enhanced linux)
 - How to create user/usergroup?
