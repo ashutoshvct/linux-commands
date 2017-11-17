@@ -97,6 +97,7 @@ allow_writeable_chroot=YES
 ls -l | awk '{print $9}'
 ---------------------------------------------------------------
 //start rail server use -d to run it in background
+
 bundle exec rails server --binding=0.0.0.0
 -----------------------------------------------------------------
 //Generating random password
@@ -2281,7 +2282,7 @@ cookbook_path            ["#{current_dir}/../cookbooks"]
 
 URL: https://learn.chef.io/tutorials/manage-a-node/ubuntu/hosted/set-up-your-chef-server/
 
-6. nano username.pem (mimum in this case)
+6. nano username.pem (mimum in this case, this is a test key and must not be used in production)
 
 -----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEA4LdckHnRPIYweL6gnGnrNIBhBhjNaoqcBqK9OKPr1My+fl9z
@@ -2865,7 +2866,7 @@ mysql -u "root" -p"$u" -D "snipeit" -e "UPDATE users SET password=('$a') WHERE i
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 //How to generate bcrypt in python
 
-python -c 'import bcrypt; print(bcrypt.hashpw("hello", bcrypt.gensalt()))')
+python -c 'import bcrypt; print(bcrypt.hashpw("hello", bcrypt.gensalt()))'
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 //How to give short URL name to URL in apache2
 
@@ -3107,7 +3108,6 @@ https://www.digitalocean.com/community/tutorials/how-to-host-a-file-sharing-serv
 
 https://download.pydio.com/pub/core/archives/pydio-core-7.0.4.tar.gz
 
-
 sha256:1000:zNREN7SwDMDPiIyWbrz10/1E4XZeYNY/pffaRhM7L54=:bPwGJlJYs/kqVWxjv1GYu6rHq+xr4HH5
 
 1. /var/www/html/iscripts/forgotpassword.sh
@@ -3309,9 +3309,6 @@ OR
 5. sudo service apache2 restart
 
 6. http://1.2.3.4/server-status
-
-
-
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // How to create browser based session on apache2
 
@@ -3615,7 +3612,7 @@ cat /proc/cpuinfo | grep processor | wc -l
 sudo ip route change default via 192.168.100.2 dev eth1 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Create AWS iam user with AWS Console login 
-s
+
 aws iam create-login-profile --user-name MyUser --password My!User1Login8P@ssword
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // How to view number of connections in nginx
@@ -3699,8 +3696,6 @@ sed -i "2s|$b|$c|" /var/www/html/nodebb/src/1.js
 find . -type f -name sed\* -exec rm -f {} \;
 
 5. 
-
-
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // How to Disable Transparent Huge Pages (THP)
@@ -3833,12 +3828,7 @@ b="$(sed -n '15p' /var/www/html/sonarqube/conf/sonar.properties)";
 c="sonar.jdbc.password=$a";
 sed -i "15s|$b|$c|" /var/www/html/sonarqube/conf/sonar.properties;
 
-5. 
-
-
-
-
-mysql -u "root" -p"root" -D "sonarqube" -e "UPDATE lime_users SET password=('') WHERE users_name = 'admin';"
+5. mysql -u "root" -p"root" -D "sonarqube" -e "UPDATE lime_users SET password=('') WHERE users_name = 'admin';"
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // q2a #qa #question2answer
@@ -4187,9 +4177,11 @@ db.createUser(
 db.updateUser(
    "admin",
    {
-      pwd: "hello123456"
+      pwd: "admin123"
    }
 ) 
+
+db.createUser( { user: "nodebb", pwd: "admin123", roles: [ { role: "readWrite", db: "nodebb" }, { role: "clusterMonitor", db: "admin" } ] } )
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // How to add new db server in phpmyadmin
 
@@ -4281,7 +4273,7 @@ ps aux | grep apache2 | awk '{sum=sum+$6}; END {print sum/1024 " MB"}'
 ps aux  | awk '{print $6/1024 " MB\t\t" $11}'  | sort -n
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // SpagoBI
-
+#SHA#nHPmUA7oguQ9LN2lkku6Q0U+0Qg=
 <Environment name="spagobi_service_url" type="java.lang.String" value="http://54.87.152.60:8080/SpagoBI"/>
 <Environment name="spagobi_host_url" type="java.lang.String" value="http://54.87.152.60:8080"/>
 
@@ -4332,17 +4324,79 @@ echo "$hash \n";
 
 mongodb://youruser:yourpassword@localhost/yourdatabase
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// UVU Backend Server
+DB details:
+root
+ghUFFQyr3MLKWE8Y
 
+uvubackend
+2S78s583tXaAe4CT
 
+sftpuvu
+b33AcDnZf7J2xMzL
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+RAM	Core	Users
+1 	1	50
+2	1	100
+4	2	400
+8	2	800
+16	4	3200
+32	8	12800
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//wekan
+admin
+admin123
+$2a$10$7eXLynVYpuR99kV5V5kKOu1GiRxurkahjhhxoy.j2FQdEbwmoTIw2
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Removing nginx
 
+sudo apt-get remove nginx nginx-common # Removes all but config files.
 
+sudo apt-get purge nginx nginx-common # Removes everything.
 
+sudo apt-get autoremove # After using any of the above commands, use this in order to remove dependencies used by nginx which are no longer required.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//How to replace complete text in file
 
+Use >> to insert at the end of file
 
+cat >file_being_appended_to <<some_random_string
+This is the first line
+This is the second line and it has a variable in it; it's right here: $some_variable
+some_random_string
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// alternative for pipe is tilde in sed.
 
+| ~
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Create encryption keys
 
+https://github.com/ivan0124/Linux-programming/wiki/How-to-generate-RSA-public-and-private-keys(PEM-format)-with-openssl-%3F
 
+openssl genrsa -out private.pem 2048
 
+openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//Convert doc to pdf
 
+sudo apt-get install unoconv
+doc2pdf your-doc-file-name.docx
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+To view the License details, please visit this URL: https://cloud.intuz.com/applications/wordpress/aws/how-to-use#Licenses
+All the software, trademarks, logo, license, and other intellectual properties used in this AMI are the exclusive property of respective owners.
+This AMI contains opensource softwares, so you cannot use enterprise version license in it. Also, we are charging you for the software installed in the AMI.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//query in AWS
+aws ec2 describe-instances --filters "Name=tag:Backup,Values=True" --query 'Reservations[*].Instances[*].BlockDeviceMappings[*].Ebs.{ID:VolumeId}'
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+z76rXkL7dLxXXZfY
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Jenkins
+https://medium.com/@teeks99/continuous-integration-with-jenkins-and-gitlab-fa770c62e88a
+https://docs.bitnami.com/huawei/how-to/create-ci-pipeline/
+https://www.digitalocean.com/community/tutorials/how-to-set-up-continuous-integration-pipelines-with-gitlab-ci-on-ubuntu-16-04
+https://blog.codecentric.de/en/2015/10/continuous-integration-platform-using-docker-container-jenkins-sonarqube-nexus-gitlab/
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
