@@ -4273,7 +4273,6 @@ ps aux | grep apache2 | awk '{sum=sum+$6}; END {print sum/1024 " MB"}'
 ps aux  | awk '{print $6/1024 " MB\t\t" $11}'  | sort -n
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // SpagoBI
-#SHA#nHPmUA7oguQ9LN2lkku6Q0U+0Qg=
 <Environment name="spagobi_service_url" type="java.lang.String" value="http://54.87.152.60:8080/SpagoBI"/>
 <Environment name="spagobi_host_url" type="java.lang.String" value="http://54.87.152.60:8080"/>
 
@@ -4324,16 +4323,7 @@ echo "$hash \n";
 
 mongodb://youruser:yourpassword@localhost/yourdatabase
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// UVU Backend Server
-DB details:
-root
-ghUFFQyr3MLKWE8Y
 
-uvubackend
-2S78s583tXaAe4CT
-
-sftpuvu
-b33AcDnZf7J2xMzL
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 RAM	Core	Users
 1 	1	50
@@ -4343,10 +4333,7 @@ RAM	Core	Users
 16	4	3200
 32	8	12800
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//wekan
-admin
-admin123
-$2a$10$7eXLynVYpuR99kV5V5kKOu1GiRxurkahjhhxoy.j2FQdEbwmoTIw2
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //Removing nginx
 
@@ -4382,14 +4369,10 @@ openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 sudo apt-get install unoconv
 doc2pdf your-doc-file-name.docx
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-To view the License details, please visit this URL: https://cloud.intuz.com/applications/wordpress/aws/how-to-use#Licenses
-All the software, trademarks, logo, license, and other intellectual properties used in this AMI are the exclusive property of respective owners.
-This AMI contains opensource softwares, so you cannot use enterprise version license in it. Also, we are charging you for the software installed in the AMI.
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //query in AWS
 aws ec2 describe-instances --filters "Name=tag:Backup,Values=True" --query 'Reservations[*].Instances[*].BlockDeviceMappings[*].Ebs.{ID:VolumeId}'
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-z76rXkL7dLxXXZfY
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Jenkins
 https://medium.com/@teeks99/continuous-integration-with-jenkins-and-gitlab-fa770c62e88a
